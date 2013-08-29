@@ -3,7 +3,7 @@
 //Required Setup Variables
 ////////////////////////////////////////////////////////////////////////
 
-require($_SERVER["DOCUMENT_ROOT"] . "/prestashop/config/settings.inc.php");
+require($_SERVER["DOCUMENT_ROOT"] . "/ps_modules/config/settings.inc.php");
 $host = _DB_SERVER_;
 $user = _DB_USER_;
 $pass = _DB_PASSWD_;
