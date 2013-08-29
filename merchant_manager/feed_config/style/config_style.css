@@ -1,0 +1,65 @@
+@charset "utf-8";
+/* CSS Document */
+
+h2 {font-size: 22px;margin: 10px 0 0 0;}
+div#feedSettingsMod {border: 2px solid #ccc; background:#F0F8FF; margin: 0 0 15px 0; padding: 0 0 0 10px;}
+table#fieldSettings {border: none; margin: 0 0 20px 0;}
+table#fieldSettings thead th {border-bottom: 1px dotted #999;}
+.title {margin: 0;padding: 0 10px 0 0;color: blue;font-weight: bold;text-align: right;font-size: 12px;}
+.required {color: red; font-size: 11px; margin-left: 12px;}
+.optional {display: none!important; font-size:1px;}
+.activeField, .inactiveField {margin-left: 5px; font-size: 13px; font-weight: bold; padding: 2px;background: #fff;}
+.inactiveField {color: red; border: 1px solid red;}
+.activeField {color: green; border: 1px solid green;}
+.noFieldEdit {background: #ee7097 url(../../images/config_h3.png) 20% 20% repeat-x !important;}
+.noFieldEdit span.required {color: #fff !important;}
+
+.border {border: 1px solid #ccc; padding: 10px 5px;}
+.br {border-right: 1px solid #ccc; border-bottom:1px solid #ccc;}
+
+.tooltip{
+    display: inline;
+    position: relative;
+	margin-left: 10px;
+}
+.tooltip:hover:after{
+    background: #333;
+    background: rgba(0,0,0,.8);
+    border-radius: 5px;
+    bottom: 26px;
+    color: #fff;
+    content: attr(title);
+    left: 20%;
+    padding: 5px 15px;
+    position: absolute;
+    z-index: 98;
+    width: 220px;
+	font-size: 12px;
+	text-align: left !important;
+}
+content: attr(title);
+.tooltip:hover:before{
+    border: solid;
+    border-color: #333 transparent;
+    border-width: 6px 6px 0 6px;
+    bottom: 20px;
+    content: "";
+    left: 50%;
+    position: absolute;
+    z-index: 99;
+}
+.accuracy {
+	width: 75%;
+	border: 1px solid #ccc;
+	border-radius: 0px 10px 10px 0px;
+	padding: 0;
+	margin: 0 0 0 5px;
+	background: #efefef;
+}
+.accuracy span.accuracyValue {
+	display: block;
+	border-radius: 0 10px 10px 0;
+	text-align: center;
+	color: #fff;
+	text-shadow: 1px 1px 3px #000;
+}
