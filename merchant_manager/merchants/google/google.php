@@ -1,3 +1,4 @@
+<?php sec_session_start(); if(login_check($mysqli) == true) { ?>
 <div class="notes">
   <h2>Helpful Links</h2>
   <table id="merchLinks">
@@ -47,3 +48,4 @@
    </tbody>
  </table>
 </div>
+<?php ;} ?>

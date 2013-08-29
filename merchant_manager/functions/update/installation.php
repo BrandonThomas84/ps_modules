@@ -21,7 +21,7 @@ CREATE TABLE `" . $schema . "`.`mc_login_attempts` (
 );";
 
 //create merchant_center_select_config
-$createTable1 = "
+$createTableFieldSettings = "
   CREATE  TABLE `" . $schema . "`.`merchant_center_select_config` (
   `id` INT NOT NULL AUTO_INCREMENT ,
   `merchant_id` VARCHAR(100) NOT NULL ,
@@ -40,16 +40,12 @@ $createTable1 = "
   UNIQUE INDEX `id_UNIQUE` (`id` ASC) );";
 
 //create merchant center exclusion table 
-$createTable2 = "
-CREATE  TABLE `" . $schema . "`.`merchant_exclusion` (
-  `id` INT NOT NULL AUTO_INCREMENT ,
-  `id_product` VARCHAR(45) NOT NULL ,
-  `google_exclude` BIT(1) NULL ,
-  `amazon_exclude` BIT(1) NULL ,
-  `pricegrabber_exclude` BIT(1) NULL ,
-  `ebay_exclude` BIT(1) NULL ,
-  `bing_exclude` BIT(1) NULL ,
-  PRIMARY KEY (`id`) ,
-  UNIQUE INDEX `id_UNIQUE` (`id` ASC) ,
-  UNIQUE INDEX `id_product_UNIQUE` (`id_product` ASC) );";
+$createTableExclusions = "
+CREATE TABLE `" . $schema . "`.`merchant_exclusion` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `id_product` varchar(45) NOT NULL,
+  `exclusion` varchar(10) NOT NULL,
+  PRIMARY KEY (`id`,`id_product`,`exclusion`),
+  UNIQUE KEY `id_UNIQUE` (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=21 DEFAULT CHARSET=latin1;";
 ?>

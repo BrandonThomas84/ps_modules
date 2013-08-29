@@ -15,11 +15,6 @@
 <link rel="stylesheet" href="http://code.jquery.com/ui/1.10.3/themes/smoothness/jquery-ui.css" />
 <script type="text/javascript" src="http://code.jquery.com/jquery-1.9.1.js"></script>
 <script type="text/javascript" src="http://code.jquery.com/ui/1.10.3/jquery-ui.js"></script>
-<script>
-	$(function() {
-	$( "#accordion" ).accordion();
-	});
-</script>
 <!--END JQuery JS -->
 </head>
 <body>
@@ -45,8 +40,8 @@ if(login_check($mysqli) == true) {
 		require ('feed_config/config.php');
 	} elseif (isset($config) && $config == "usrreg"){
 		require ('functions/login/register.php');
-		} elseif($module == "exmng"){
-			require('merchant_exclusions.php');
+		} elseif (isset($config) && $config == "exmng"){
+			require ('merchant_exclusions.php');
 			} else {
 				if(
 					!isset($GLOBALS["merch"]) || 

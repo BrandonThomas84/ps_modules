@@ -34,11 +34,6 @@ function feedConfigStaticDisplay($value){
 	if($value === 'N'){return "style=\"display: none;\"";
 	}
 }
-function feedConfigSelected($needle,$haystack){
-	if($needle === "NULL" || $needle === "N/A"){return "";
-	} elseif($needle == $haystack){return " selected ";
-		}
-}
 function feedConfigActive($value){
 	if($value === 'N'){return "<span class=\"inactiveField\">Inactive</span>";
 	} else {return "<span class=\"activeField\">Active</span>";
@@ -59,7 +54,7 @@ function feedConfigAvailableFunctions($function){
 }
 //returns the total number of products in the database that are to be included in the feed
 function totalProducts(){ 
-	$sql = "SELECT COUNT(DISTINCT `a1`.`id_product`) AS `total` FROM `" . $GLOBALS["schema"] . "`.`" . $GLOBALS["tableLead"] . "product` AS `a1` LEFT JOIN `" . $GLOBALS["schema"] . "`.`merchant_exclusion` AS `a2` ON `a1`.`id_product` = `a2`.`id_product` AND `a2`.`" . $GLOBALS["merchantID"] . "_exclude` IS NOT NULL WHERE `a2`.`id` IS NULL;";
+	$sql = "SELECT COUNT(DISTINCT `a1`.`id_product`) AS `total` FROM `" . $GLOBALS["schema"] . "`.`" . $GLOBALS["tableLead"] . "product` AS `a1` LEFT JOIN `" . $GLOBALS["schema"] . "`.`merchant_exclusion` AS `a2` ON `a1`.`id_product` = `a2`.`id_product` AND `a2`.`exclusion` = '" . $GLOBALS["merchantID"] . "' WHERE `a2`.`id` IS NULL;";
 	$query = mysql_query($sql);
 	$row = mysql_fetch_array($query);
 	
@@ -76,16 +71,21 @@ function functionalProducts($table,$field,$used){
 			$from = reportQueryFrom($GLOBALS["schema"],$GLOBALS["tableLead"]);
 			$where = reportQueryWhere($GLOBALS["schema"],$GLOBALS["merchant"]) . "AND (`" . $table . "`.`" . $field . "` IS NOT NULL AND `" . $table . "`.`" . $field . "` != '')";
 			$query = mysql_query($select . $from . $where);
-			$row = mysql_fetch_array($query);
+			@$numRow = mysql_num_rows($query);
 			
-			return $row["total"];
-	
+			if($numRow == 0){ 
+				return "0";
+			} else {
+				$row = mysql_fetch_array($query);
+				return $row["total"];
+				}
+
 		} else { 
 				return totalProducts($GLOBALS["schema"],$GLOBALS["tableLead"]);
 			}
 	}
 }
-
+//displays the feed health information on the configuration page
 function feedHealthDisplay(){
 	$sql = "SELECT `table_name`,`database_field_name`,`enabled` FROM `" . $GLOBALS["schema"] . "`.`merchant_center_select_config` WHERE `id` = " . $_GET["fieldID"];
 	$query = mysql_query($sql);

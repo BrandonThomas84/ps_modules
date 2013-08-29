@@ -11,7 +11,6 @@ if(!isset($_GET["f"])){$module = "home";} else {$module = $_GET["f"];}
 
 //merchant friendly name generator
 function merchantID($f){
-	if($f == "exmng"){$v = "exmng";}
 	if($f == "apf"){$v = "amazon";}
 	if($f == "epf"){$v =  "ebay";}
 	if($f == "gpf"){$v =  "google";}
@@ -40,6 +39,13 @@ if(isset($_GET["f"])){
 		require($GLOBALS["root"] . "/merchant_manager/merchants/" . $GLOBALS["merchantID"] . "/" . $GLOBALS["merchantID"] . "_functions.php");
 	}
 }
+
+function feedConfigSelected($needle,$haystack){
+	if($needle === "NULL" || $needle === "N/A"){return "";
+	} elseif($needle == $haystack){return " selected ";
+		}
+}
+
 function navGeneration(){
 	$sql = "SELECT DISTINCT `merchant_id` FROM `" . $GLOBALS["schema"] . "`.`merchant_center_select_config` ORDER BY `merchant_id`";
 	
@@ -99,17 +105,23 @@ function messageReporting(){
 				} elseif($msg == "er0003"){
 					$d = "errMod";
 					$m = "<p>Passwords do not match</p>";
-					} elseif($msg == "sc0001"){
-						$d = "sucMod";
-						$m = "<p>Success! You have updated your feed settings!</p>";
-						} elseif($msg == "sc0002"){
+					} elseif($msg == "er0004"){
+						$d = "errMod";
+						$m = "<p>An exceiption for that product within this feed already exists</p>";
+						} elseif($msg == "sc0001"){
 							$d = "sucMod";
-							$m = "<p>New File created successfully</p>";
-							} elseif($msg == "sc0003"){
+							$m = "<p>Success! You have updated your feed settings!</p>";
+							} elseif($msg == "sc0002"){
 								$d = "sucMod";
-								$m = "<p>Successfully Created new User</p>";
-								}
-		return "
+								$m = "<p>New File created successfully</p>";
+								} elseif($msg == "sc0003"){
+									$d = "sucMod";
+									$m = "<p>Successfully Created new User</p>";
+									}elseif($msg == "sc0004"){
+										$d = "sucMod";
+										$m = "<p>You have successfully added a product to your exlcuions!</p>";
+										} 
+			return "
 		<div class=\"$d\">
 			$m
 		</div>
@@ -216,7 +228,7 @@ function reportQueryFrom(){
 
 //create query portion - "where"
 function reportQueryWhere(){
-	return " WHERE (`a1`.`active` = 1) AND (`a1`.`available_for_order` = 1) AND (`a1`.`id_product` NOT IN (SELECT id_product FROM `" . $GLOBALS["schema"] . "`.`merchant_exclusion` WHERE `" . $GLOBALS["merchantID"] . "_exclude` = 1))";
+	return " WHERE (`a1`.`active` = 1) AND (`a1`.`available_for_order` = 1) AND (`a1`.`id_product` NOT IN (SELECT id_product FROM `" . $GLOBALS["schema"] . "`.`merchant_exclusion` WHERE `exclusion` = '" . $GLOBALS["merchantID"] . "'))";
 }
 
 ////////////////////////////////////////////////////////////////////////
