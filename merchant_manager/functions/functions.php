@@ -1,6 +1,5 @@
 <?php
-$root = $_SERVER["DOCUMENT_ROOT"] . "/ps_modules";
-require($GLOBALS["root"] . "/merchant_manager/functions/db_connect.php");
+require($_SERVER["DOCUMENT_ROOT"] . "/ps_modules/merchant_manager/functions/db_connect.php");
 
 ////////////////////////////////////////////////////////////////////////
 // General Functions

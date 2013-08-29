@@ -15,4 +15,5 @@ $link = mysql_connect($host,$user,$pass);
 //error and success messages that will need to be removed from the return URL
 $msgs = array("&msg=er0001","&msg=sc0001","&msg=sc0002");
 $returnURL = str_replace($msgs,"",$_SERVER["HTTP_REFERER"]);
+$root = $_SERVER["DOCUMENT_ROOT"] . "/ps_modules";
 ?>
