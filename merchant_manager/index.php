@@ -25,20 +25,25 @@
 </script>
 <!--END JQuery JS -->
 </head>
-<?php require('functions/functions.php'); ?>
-
 <body>
 <div id="primary">
+
+<?php 
+require('functions/functions.php');
+sec_session_start();
+if(login_check($mysqli) == true) {
+
+?>
+<!--Login: http://www.wikihow.com/Create-a-Secure-Login-Script-in-PHP-and-MySQL-->
+
   <div id="nav">
     <a href="./" title="home"><p>Merchant Manager</p></a>
     <p style="margin: 3px 10px 5px 10px;font-size: 13px;">Select from your installed modules</p>
-<?php 
-	navGeneration(
-	); 
-?>
+	<?php navGeneration();?>
   </div>
   <div id="main">
 <?php 
+	echo messageReporting();
 	if(isset($config)){
 		require ('feed_config/config.php');
 	} elseif($module == "exmng"){
@@ -60,6 +65,18 @@
 	}
 ?>
   </div>
+
+<?php
+} else {
+	echo "
+	<!--START js Login-->
+	<script type=\"text/javascript\" src=\"functions/login/sha512.js\"></script>
+	<script type=\"text/javascript\" src=\"functions/login/forms.js\"></script>
+	<!--END js Login-->";
+
+   require('functions/login/login.php');
+}
+?>
 </div>
 </body>
 </html>

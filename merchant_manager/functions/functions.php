@@ -1,9 +1,10 @@
 <?php
 require($_SERVER["DOCUMENT_ROOT"] . "/ps_modules/merchant_manager/functions/db_connect.php");
-
+require($_SERVER["DOCUMENT_ROOT"] . "/ps_modules/merchant_manager/functions/login/login_functions.php");
 ////////////////////////////////////////////////////////////////////////
 // General Functions
 ////////////////////////////////////////////////////////////////////////	
+
 //instructs the index page which module / control panel to display based on the the URL
 if(isset($_GET["p"])){$config = $_GET["p"];}
 if(!isset($_GET["f"])){$module = "home";} else {$module = $_GET["f"];}
@@ -59,7 +60,13 @@ function navGeneration(){
 	<a href=\"./index.php?f=exmng\" title=\"Manage Product Exclusions\">
     	<li " . navActiveClass(array("1",@$_GET["ex"])) . ">Manage Product Exclusions</li>
 	</a>
-		";
+	<hr><br>
+	<a href=\"./functions/login/register.php\" title=\"Create New User\">
+    	<li " . navActiveClass(array("1",@$_GET["ex"])) . ">Create New User</li>
+	</a>
+	<a href=\"./functions/login/logout.php\" title=\"Logout\">
+    	<li " . navActiveClass(array("1",@$_GET["ex"])) . ">Logout</li>
+	</a>";
 }
 
 //adds an active class to the left hand navigation for selected module / control panel
@@ -86,13 +93,22 @@ function messageReporting(){
 		if($msg == "er0001"){ 
 			$d = "errMod";
 			$m = "<p>Sorry...The field you are trying to edit has been disabled.</p><p>Please try another field.</p>";
-			} elseif($msg == "sc0001"){
-				$d = "sucMod";
-				$m = "<p>Success! You have updated your feed settings!</p>";
-				} elseif($msg == "sc0002"){
-					$d = "sucMod";
-					$m = "<p>New File created successfully</p>";
-					}	
+			} elseif($msg == "er0002"){
+				$d = "errMod";
+				$m = "<p>Incorrect Login Information</p>";
+				} elseif($msg == "er0003"){
+					$d = "errMod";
+					$m = "<p>Passwords do not match</p>";
+					} elseif($msg == "sc0001"){
+						$d = "sucMod";
+						$m = "<p>Success! You have updated your feed settings!</p>";
+						} elseif($msg == "sc0002"){
+							$d = "sucMod";
+							$m = "<p>New File created successfully</p>";
+							} elseif($msg == "sc0003"){
+								$d = "sucMod";
+								$m = "<p>Successfully Created new User</p>";
+								}
 		return "
 		<div class=\"$d\">
 			$m
