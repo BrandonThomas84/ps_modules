@@ -61,7 +61,7 @@ function navGeneration(){
     	<li " . navActiveClass(array("1",@$_GET["ex"])) . ">Manage Product Exclusions</li>
 	</a>
 	<hr><br>
-	<a href=\"./functions/login/register.php\" title=\"Create New User\">
+	<a href=\"./index.php?p=usrreg\" title=\"Create New User\">
     	<li " . navActiveClass(array("1",@$_GET["ex"])) . ">Create New User</li>
 	</a>
 	<a href=\"./functions/login/logout.php\" title=\"Logout\">
@@ -218,14 +218,7 @@ function reportQueryFrom(){
 function reportQueryWhere(){
 	return " WHERE (`a1`.`active` = 1) AND (`a1`.`available_for_order` = 1) AND (`a1`.`id_product` NOT IN (SELECT id_product FROM `" . $GLOBALS["schema"] . "`.`merchant_exclusion` WHERE `" . $GLOBALS["merchantID"] . "_exclude` = 1))";
 }
-//returns the total number of products in the database that are to be included in the feed
-function totalProducts(){ 
-	$sql = "SELECT COUNT(DISTINCT `a1`.`id_product`) AS 'total' FROM `" . $GLOBALS["schema"] . "`.`" . $GLOBALS["tableLead"] . "_product` AS `a1` LEFT JOIN `" . $GLOBALS["schema"] . "`.`merchant_exclusion` AS `a2` ON `a1`.id_product = `a2`.id_product AND `a2`.`" . $GLOBALS["merchantID"] . "_exclude` IS NOT NULL WHERE `a2`.`id` IS NULL;";
-	$query = mysql_query($sql);
-	$row = mysql_fetch_array($query);
-	
-	return $row["total"];
-}
+
 ////////////////////////////////////////////////////////////////////////
 //File Creation Functions 
 ////////////////////////////////////////////////////////////////////////

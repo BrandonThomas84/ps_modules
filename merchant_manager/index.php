@@ -7,10 +7,7 @@
 <meta name="robots" content="noindex,nofollow" />
 <!--STYLESHEETS-->
 <link href="style/style.css" rel="stylesheet" type="text/css" media="screen">
-<?php if(isset($_GET["p"])){?>
-	<!-- Conditionally linking the style sheet for the configuration pages -->
-	<link href="feed_config/style/config_style.css" rel="stylesheet" type="text/css" media="screen">
-<?php ;} ?>
+<link href="feed_config/style/config_style.css" rel="stylesheet" type="text/css" media="screen">
 <!--START Google web fonts -->
 <link href='http://fonts.googleapis.com/css?family=Armata' rel='stylesheet' type='text/css'>
 <!--END Google web fonts -->
@@ -44,12 +41,18 @@ if(login_check($mysqli) == true) {
   <div id="main">
 <?php 
 	echo messageReporting();
-	if(isset($config)){
+	if(isset($config) && $config == "config"){
 		require ('feed_config/config.php');
-	} elseif($module == "exmng"){
-		require('merchant_exclusions.php');
-		} else {
-			if(!isset($GLOBALS["merch"]) || $GLOBALS["merch"] == '' || $GLOBALS["merch"] == 'home'){
+	} elseif (isset($config) && $config == "usrreg"){
+		require ('functions/login/register.php');
+		} elseif($module == "exmng"){
+			require('merchant_exclusions.php');
+			} else {
+				if(
+					!isset($GLOBALS["merch"]) || 
+					$GLOBALS["merch"] == '' || 
+					$GLOBALS["merch"] == 'home'
+				  ){
 ?>
     
     <h1>Merchant Manager</h1><br/>
@@ -66,17 +69,14 @@ if(login_check($mysqli) == true) {
 ?>
   </div>
 
-<?php
-} else {
-	echo "
-	<!--START js Login-->
-	<script type=\"text/javascript\" src=\"functions/login/sha512.js\"></script>
-	<script type=\"text/javascript\" src=\"functions/login/forms.js\"></script>
-	<!--END js Login-->";
 
-   require('functions/login/login.php');
-}
-?>
+<?php } else { ?>
+<!--START js Login-->
+<script type="text/javascript" src="functions/login/sha512.js"></script>
+<script type="text/javascript" src="functions/login/forms.js"></script>
+<!--END js Login-->
+<?php require('functions/login/login.php');}?>
+
 </div>
 </body>
 </html>
