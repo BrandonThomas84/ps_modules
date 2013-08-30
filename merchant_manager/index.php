@@ -42,12 +42,14 @@ if(login_check($mysqli) == true) {
 		require ('functions/login/register.php');
 		} elseif (isset($config) && $config == "exmng"){
 			require ('merchant_exclusions.php');
-			} else {
-				if(
-					!isset($GLOBALS["merch"]) || 
-					$GLOBALS["merch"] == '' || 
-					$GLOBALS["merch"] == 'home'
-				  ){
+			} elseif (isset($config) && $config == "tax"){
+				require ('functions/product_taxonomy.php');
+				} else {
+					if(
+						!isset($GLOBALS["merch"]) || 
+						$GLOBALS["merch"] == '' || 
+						$GLOBALS["merch"] == 'home'
+					  ){
 ?>
     
     <h1>Merchant Manager</h1><br/>

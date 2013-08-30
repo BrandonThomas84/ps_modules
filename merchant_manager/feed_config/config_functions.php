@@ -145,7 +145,7 @@ function displayFieldConfig(){
 	$cRow = mysql_fetch_array($GLOBALS["fieldQUERY"]);		
 	
 	echo "
-	<h3 id=\"" . $cRow["report_field_name"] . "\" class=\"" . feedConfigEditableHeader($cRow["editable"]) . "\" >[" . $cRow["report_field_name"] . "]" .  feedConfigActive($cRow["enabled"]) .feedConfigRequiredCaption($cRow["required"]) . "</h3>
+	<h2 id=\"" . $cRow["report_field_name"] . "\" class=\"" . feedConfigEditableHeader($cRow["editable"]) . "\" >[" . $cRow["report_field_name"] . "]" .  feedConfigActive($cRow["enabled"]) .feedConfigRequiredCaption($cRow["required"]) . "</h2>
 	<div id=\"feedSettingsMod\">
 	<form action=\"feed_config/config_u.php\" method=\"POST\" enctype=\"application/x-www-form-urlencoded\" title=\"" . $cRow["report_field_name"] ." Configuration\" name=\"" . $cRow["report_field_name"] . "\" >
 	<table cellspacing=\"0\" cellpadding=\"0\" id=\"fieldSettings\">
@@ -203,7 +203,8 @@ function displayFieldConfig(){
 	        <option value=\"NULL\" " . feedConfigSelected("NULL",$cRow["custom_function"]) . ">NONE SELECTED</option>
 	        <option value=\"upcFix\" " . feedConfigSelected("upcFix",$cRow["custom_function"]) . ">upcFix</option>
 	        <option value=\"imageLink\" " . feedConfigSelected("imageLink",$cRow["custom_function"]) . ">imageLink</option>
-	        <option value=\"productLink\" " . feedConfigSelected("productLink",$cRow["custom_function"]) . ">productLink</option> " . feedConfigAvailableFunctions($cRow["merchant_id"],$cRow["custom_function"]) . "</select></td>
+	        <option value=\"productLink\" " . feedConfigSelected("productLink",$cRow["custom_function"]) . ">productLink</option>
+	        <option value=\"productCategory\" " . feedConfigSelected("productCategory",$cRow["custom_function"]) . ">productCategory</option> " . feedConfigAvailableFunctions($cRow["merchant_id"],$cRow["custom_function"]) . "</select></td>
 	    <td>
 			<div class=\"hidden\">
 				<input type=\"hidden\" name=\"report_field_name\" value=\"" . $cRow["report_field_name"] . "\" >
@@ -236,6 +237,7 @@ echo "	</td>
 	    <td></td>
 	  </tr>
 	</table>
+	<div><a href=\"" . $_SERVER["PHP_SELF"] . "?f=" . $GLOBALS["merch"] . "\" title=\"Return to " . $GLOBALS["merchant"] . "\">Return to " . $GLOBALS["merchant"] . " Control Panel</a></div>
 	</div>
 ";
 

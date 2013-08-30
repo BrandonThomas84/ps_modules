@@ -178,15 +178,25 @@ function reportQueryFrom(){
 		 SELECT `prd`.`id_product` AS `id_product`,
 			`prd_type`.`catName1` AS `catName1`,
 			`prd_type`.`catName2` AS `catName2`,
-			`prd_type`.`catName3` AS `catName3` 
-		 FROM 
+			`prd_type`.`catName3` AS `catName3`,
+			`prd_type`.`catName3` AS `catName4`,
+			`prd_type`.`catName3` AS `catName5`,
+			`prd_type`.`catName3` AS `catName6`,
+			`prd_type`.`catName3` AS `catName7` 
+		 FROM
 			(
 				SELECT `crmb1`.`id_category` AS `prd_category1`,
 					`crmb2`.`id_category` AS `prd_category2`,
 					`crmb3`.`id_category` AS `prd_category3`,
+					`crmb4`.`id_category` AS `prd_category4`,
+					`crmb5`.`id_category` AS `prd_category5`,
+					`crmb6`.`id_category` AS `prd_category6`,
 					`crmb1`.`name` AS `catName1`,
 					`crmb2`.`name` AS `catName2`,
-					`crmb3`.`name` AS `catName3` 
+					`crmb3`.`name` AS `catName3`, 
+					`crmb4`.`name` AS `catName4`,
+					`crmb5`.`name` AS `catName5`,
+					`crmb6`.`name` AS `catName6`
 					 FROM 
 						(SELECT `nam`.`name` AS `name`,
 							`num`.`id_category` AS `id_category`,
@@ -216,10 +226,50 @@ function reportQueryFrom(){
 						 WHERE `num`.`active` = 1
 						) `crmb3` 
 					ON `crmb3`.`id_parent` = `crmb2`.`id_category`
+					LEFT JOIN 
+						(SELECT `nam`.`name` AS `name`,
+							`num`.`id_category` AS `id_category`,
+							`num`.`id_parent` AS `id_parent` 
+						 FROM `" . $GLOBALS["schema"] . "`.`" . $GLOBALS["tableLead"] . "category` `num` 
+						 INNER JOIN `" . $GLOBALS["schema"] . "`.`" . $GLOBALS["tableLead"] . "category_lang` `nam` 
+						 ON `num`.`id_category` = `nam`.`id_category`
+						 WHERE `num`.`active` = 1
+						) `crmb4` 
+					ON `crmb4`.`id_parent` = `crmb3`.`id_category`
+					LEFT JOIN 
+						(SELECT `nam`.`name` AS `name`,
+							`num`.`id_category` AS `id_category`,
+							`num`.`id_parent` AS `id_parent` 
+						 FROM `" . $GLOBALS["schema"] . "`.`" . $GLOBALS["tableLead"] . "category` `num` 
+						 INNER JOIN `" . $GLOBALS["schema"] . "`.`" . $GLOBALS["tableLead"] . "category_lang` `nam` 
+						 ON `num`.`id_category` = `nam`.`id_category`
+						 WHERE `num`.`active` = 1
+						) `crmb5` 
+					ON `crmb5`.`id_parent` = `crmb4`.`id_category`
+					LEFT JOIN 
+						(SELECT `nam`.`name` AS `name`,
+							`num`.`id_category` AS `id_category`,
+							`num`.`id_parent` AS `id_parent` 
+						 FROM `" . $GLOBALS["schema"] . "`.`" . $GLOBALS["tableLead"] . "category` `num` 
+						 INNER JOIN `" . $GLOBALS["schema"] . "`.`" . $GLOBALS["tableLead"] . "category_lang` `nam` 
+						 ON `num`.`id_category` = `nam`.`id_category`
+						 WHERE `num`.`active` = 1
+						) `crmb6` 
+					ON `crmb6`.`id_parent` = `crmb5`.`id_category`
+					LEFT JOIN 
+						(SELECT `nam`.`name` AS `name`,
+							`num`.`id_category` AS `id_category`,
+							`num`.`id_parent` AS `id_parent` 
+						 FROM `" . $GLOBALS["schema"] . "`.`" . $GLOBALS["tableLead"] . "category` `num` 
+						 INNER JOIN `" . $GLOBALS["schema"] . "`.`" . $GLOBALS["tableLead"] . "category_lang` `nam` 
+						 ON `num`.`id_category` = `nam`.`id_category`
+						 WHERE `num`.`active` = 1
+						) `crmb7` 
+					ON `crmb7`.`id_parent` = `crmb6`.`id_category`
 				WHERE `crmb1`.`id_category` NOT IN (1 , 2)
 			) `prd_type` 
 			LEFT JOIN `" . $GLOBALS["schema"] . "`.`" . $GLOBALS["tableLead"] . "category_product` `prd` 
-			ON `prd`.`id_category` = coalesce(`prd_type`.`prd_category3`, `prd_type`.`prd_category2`, `prd_type`.`prd_category1`) 
+			ON `prd`.`id_category` = coalesce(`prd_type`.`prd_category6`,`prd_type`.`prd_category5`,`prd_type`.`prd_category4`,`prd_type`.`prd_category3`, `prd_type`.`prd_category2`, `prd_type`.`prd_category1`) 
 			GROUP BY `prd`.`id_product` 
 			ORDER BY `prd_type`.`prd_category1` 
 		) `a5` 
@@ -287,12 +337,12 @@ function customFunction($value,$alias){
 	if($value == "upcFix"){return upcFix($alias);} 
 	if($value == "imageLink"){return imageLink($alias);} 
 	if($value == "productLink"){return productLink($alias);}
+	if($value == "productCategory"){return productCategory($alias);}
 	
 	//Google specific custom functions
 	if($GLOBALS["merchantID"] == "google"){ 
 		if($value == "availability"){return googleAvailability($alias);}
 		elseif($value == "identifier_exists"){return googleIdentifier_exists($alias);}
-		elseif($value == "product_type"){return googleProduct_type($alias);}
 	}
 	//PriceGrabber specific custom functions
 	if($GLOBALS["merchantID"] == "pricegrabber"){ 
@@ -309,11 +359,188 @@ function upcFix($alias){
             when (length(`a1`.`upc`) = 10) then concat('00', `a1`.`upc`)
         end) AS `" . $alias . "`";
 }
+
 function imageLink($alias){
 	return "concat('http://" . $_SERVER["SERVER_NAME"] . "/', `a1`.`id_product`,'-large_default/',replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(`a3`.`name`, '-', ''), '#', ''), '$', ''), '%', ''), '&', ''), '(', ''), ')', ''), '*', ''), ',', ''), '.', ''), '/', ''), ':', ''), ';', ''), '?', ''), '@', ''), '[', ''), ']', ''), '_', ''), '`', ''), '{', ''), '|', ''), '}', ''), '~', ''), '‘', ''), '‹', ''), '›', ''), '‾', ''), '+', ''), '<', ''), '=', ''), '>', ''), '↑', ''), '†', ''), '‡', ''), '‰', ''), '™', ''), '" . chr(92) .  "'', ''), '\"', ''), ' ', '-'), '---', '-'), '--', '-'), '.jpg') AS `" . $alias . "`";
 }
+
 function productLink($alias){
 	return "concat('http://" . $_SERVER["SERVER_NAME"] . "/', `a4`.`link_rewrite`, '/', `a1`.`id_product`, '-', replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(`a3`.`name`, '-', ''), '#', ''), '$', ''), '%', ''), '&', ''), '(', ''), ')', ''), '*', ''), ',', ''), '.', ''), '/', ''), ':', ''), ';', ''), '?', ''), '@', ''), '[', ''), ']', ''), '_', ''), '`', ''), '{', ''), '|', ''), '}', ''), '~', ''), '‘', ''), '‹', ''), '›', ''), '‾', ''), '+', ''), '<', ''), '=', ''), '>', ''), '↑', ''), '†', ''), '‡', ''), '‰', ''), '™', ''), '" . chr(92) .  "'', ''), '\"', ''), ' ', '-'), '---', '-'), '--', '-'), '.html') AS `" . $alias . "`";
 }
+
+function productCategory($alias){
+	return "(case
+		when 
+			isnull(`a5`.`catName1`) 
+		then NULL
+		when 
+			((`a5`.`catName1` is not null) 
+				AND isnull(`a5`.`catName2`) 
+				AND isnull(`a5`.`catName3`) 
+				AND isnull(`a5`.`catName4`) 
+				AND isnull(`a5`.`catName5`) 
+				AND isnull(`a5`.`catName6`)
+				AND isnull(`a5`.`catName7`))
+		then `a5`.`catName1`
+		when 
+			((`a5`.`catName1` is not null AND `a5`.`catName2` is not null)
+				AND isnull(`a5`.`catName3`) 
+				AND isnull(`a5`.`catName4`) 
+				AND isnull(`a5`.`catName5`) 
+				AND isnull(`a5`.`catName6`)
+				AND isnull(`a5`.`catName7`))
+		then concat(`a5`.`catName1`, 
+					' > ',
+					`a5`.`catName2`)
+		when
+			((`a5`.`catName1` is not null AND `a5`.`catName2` is not null AND `a5`.`catName3` is not null)
+				AND isnull(`a5`.`catName4`) 
+				AND isnull(`a5`.`catName5`) 
+				AND isnull(`a5`.`catName6`)
+				AND isnull(`a5`.`catName7`))
+		then concat(`a5`.`catName1`,
+					' > ',
+					`a5`.`catName2`,
+					' > ',
+					`a5`.`catName3`)
+		when
+			((`a5`.`catName1` is not null AND `a5`.`catName2` is not null AND `a5`.`catName3` is not null AND `a5`.`catName4` is not null) 
+				AND isnull(`a5`.`catName5`) 
+				AND isnull(`a5`.`catName6`)
+				AND isnull(`a5`.`catName7`))
+		then concat(`a5`.`catName1`,
+					' > ',
+					`a5`.`catName2`,
+					' > ',
+					`a5`.`catName3`,
+					' > ',
+					`a5`.`catName4`)
+		when
+			((`a5`.`catName1` is not null AND `a5`.`catName2` is not null AND `a5`.`catName3` is not null AND `a5`.`catName4` is not null AND `a5`.`catName5` is not null)  
+				AND isnull(`a5`.`catName6`)
+				AND isnull(`a5`.`catName7`))
+		then concat(`a5`.`catName1`,
+					' > ',
+					`a5`.`catName2`,
+					' > ',
+					`a5`.`catName3`,
+					' > ',
+					`a5`.`catName4`,
+					' > ',
+					`a5`.`catName5`)
+		when
+			((`a5`.`catName1` is not null AND `a5`.`catName2` is not null AND `a5`.`catName3` is not null AND `a5`.`catName4` is not null AND `a5`.`catName5` is not null AND `a5`.`catName6` is not null)
+				AND isnull(`a5`.`catName7`))
+		then concat(`a5`.`catName1`,
+					' > ',
+					`a5`.`catName2`,
+					' > ',
+					`a5`.`catName3`,
+					' > ',
+					`a5`.`catName4`,
+					' > ',
+					`a5`.`catName5`,
+					' > ',
+					`a5`.`catName6`)
+		when
+			(`a5`.`catName1` is not null AND `a5`.`catName2` is not null AND `a5`.`catName3` is not null AND `a5`.`catName4` is not null AND `a5`.`catName5` is not null AND `a5`.`catName6` is not null AND `a5`.`catName7` is not null)
+		then concat(`a5`.`catName1`,
+					' > ',
+					`a5`.`catName2`,
+					' > ',
+					`a5`.`catName3`,
+					' > ',
+					`a5`.`catName4`,
+					' > ',
+					`a5`.`catName5`,
+					' > ',
+					`a5`.`catName6`,
+					' > ',
+					`a5`.`catName7`)		
+		else NULL
+	end) AS `" . $alias . "`";
+}
+
+//creates an option list containing all the categories that are currently configured in the prestashop database (up to 7 levels)
+function distinctProductCategoryOptionList(){
+	$sql = "SELECT DISTINCT " . productCategory("product_type") .  reportQueryFrom() . reportQueryWhere();
+	$query = mysql_query($sql);
+	
+	echo "<select name=\"categories\">";
+	while($row = mysql_fetch_array($query)){
+		echo "<option value=\"" . $row["product_type"] . "\">" . $row["product_type"] . "</option>";
+	}
+	echo "</select>";
+}
+
+//instructs the merchant manager page to display the configure taxonomy button if there is a standard dataset present in the database
+function taxonomyButton(){
+	$sql = "SELECT DISTINCT `a2`.`merchant_id` FROM `testashop`.`mc_taxonomy` AS `a1` INNER JOIN `testashop`.`merchant_center_select_config` AS `a2` ON `a1`.`merchant_id` = `a2`.`merchant_id` WHERE `a1`.`merchant_id` = '" . $GLOBALS["merchantID"] . "';";
+	$query = mysql_query($sql);
+	if(mysql_num_rows($query) > 0){
+		return "<a class=\"button\" href=\"" . $_SERVER["PHP_SELF"] . "?f=" . $GLOBALS["merch"] . "&p=tax\" title=\"Product Taxonomy\">" . $GLOBALS["merchant"] ." Product Taxonomy</a>";
+	}
+}
+
+//creates and option list that will display a list of the acceptable taxonomy values for the current merchant
+function taxonomyDisplay($level,$parent){
+	$sql = "SELECT DISTINCT `level" . $level . "` AS `taxonomy`, `merchant_id`, `id` FROM `" . $GLOBALS["schema"] . "`.`mc_taxonomy` WHERE `merchant_id` = '" . $GLOBALS["merchantID"] . "';";
+	$query = mysql_query($sql);
+
+	echo "<select name=\"level" . $level . "\">";
+	while($row = mysql_fetch_array($query)){
+		echo "<option value=\"" . $row["taxonomy"] . "\">" . $row["taxonomy"] . "</option>";
+	}
+	echo "</select>";
+}
+
+//check to see if there is already a mapped value for this category if not it will insert the value into the database table if there is it returns the taxonomy id that is being used
+function categoryToTaxCheck($category){
+	$sql = "SELECT * FROM `" . $GLOBALS["schema"] . "`.`mc_cattax_mapping` WHERE `cattax_merchant_id` = '" . $GLOBALS["merchantID"] . "' AND `category_string` =  '" . $category . "';";
+	$query = mysql_query($sql);
+	$numRows = mysql_num_rows($query);
+	$row = mysql_fetch_array($query);
+	
+	if($numRows == 0){
+		$insert = "INSERT INTO `" . $GLOBALS["schema"] . "`.`mc_cattax_mapping` (`category_string`,`cattax_merchant_id`) VALUES ('$category','" . $GLOBALS["merchantID"] . "');";
+		$query2 = mysql_query($insert);
+
+		return 0;
+	} else {
+		return $row["cattax_id"];
+	}
+}
+
+function displayTaxOptionList($level,$id){
+	
+	if($id == 0){$where = "";} else {$where = " WHERE `id` = '" . $id . "';";}
+
+	$sql = "SELECT DISTINCT `level1`,`level2`,`level3`,`level4`,`level5`,`level6`,`level7` FROM `" . $GLOBALS["schema"] . "`.`mc_taxonomy`" . $where;
+	$query = mysql_query($sql);
+	$row = mysql_fetch_array($query);
+	$c = 0;
+
+	if((is_null($row["level1"])) || ($id == 0)) {$l1 = ""; } else {$l1 = " AND replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(`level1`, '-', ''), '#', ''), '$', ''), '%', ''), '" . chr(38) . "', ''), '(', ''), ')', ''), '*', ''), ',', ''), '.', ''), '/', ''), ':', ''), ';', ''), '?', ''), '@', ''), '[', ''), ']', ''), '_', ''), '`', ''), '{', ''), '|', ''), '}', ''), '~', ''), '‘', ''), '‹', ''), '›', ''), '+', ''), '<', ''), '=', ''), '>', ''), '\'', ''), '\"', ''), ' ', ''), '---', ''), '--', '') = replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace('" . $row["level1"] . "', '-', ''), '#', ''), '$', ''), '%', ''), '" . chr(38) . "', ''), '(', ''), ')', ''), '*', ''), ',', ''), '.', ''), '/', ''), ':', ''), ';', ''), '?', ''), '@', ''), '[', ''), ']', ''), '_', ''), '`', ''), '{', ''), '|', ''), '}', ''), '~', ''), '‘', ''), '‹', ''), '›', ''), '+', ''), '<', ''), '=', ''), '>', ''), '\'', ''), '\"', ''), ' ', ''), '---', ''), '--', '')";} 
+	if((is_null($row["level2"])) || ($id == 0) || ($level < 2)) {$l2 = "";} else {$l2 = " AND replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(`level2`, '-', ''), '#', ''), '$', ''), '%', ''), '" . chr(38) . "', ''), '(', ''), ')', ''), '*', ''), ',', ''), '.', ''), '/', ''), ':', ''), ';', ''), '?', ''), '@', ''), '[', ''), ']', ''), '_', ''), '`', ''), '{', ''), '|', ''), '}', ''), '~', ''), '‘', ''), '‹', ''), '›', ''), '+', ''), '<', ''), '=', ''), '>', ''), '\'', ''), '\"', ''), ' ', ''), '---', ''), '--', '') = replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace('" . $row["level2"] . "', '-', ''), '#', ''), '$', ''), '%', ''), '" . chr(38) . "', ''), '(', ''), ')', ''), '*', ''), ',', ''), '.', ''), '/', ''), ':', ''), ';', ''), '?', ''), '@', ''), '[', ''), ']', ''), '_', ''), '`', ''), '{', ''), '|', ''), '}', ''), '~', ''), '‘', ''), '‹', ''), '›', ''), '+', ''), '<', ''), '=', ''), '>', ''), '\'', ''), '\"', ''), ' ', ''), '---', ''), '--', '')";}
+	if((is_null($row["level3"])) || ($id == 0) || ($level < 3)) {$l3 = "";} else {$l3 = " AND replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(`level3`, '-', ''), '#', ''), '$', ''), '%', ''), '" . chr(38) . "', ''), '(', ''), ')', ''), '*', ''), ',', ''), '.', ''), '/', ''), ':', ''), ';', ''), '?', ''), '@', ''), '[', ''), ']', ''), '_', ''), '`', ''), '{', ''), '|', ''), '}', ''), '~', ''), '‘', ''), '‹', ''), '›', ''), '+', ''), '<', ''), '=', ''), '>', ''), '\'', ''), '\"', ''), ' ', ''), '---', ''), '--', '') = replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace('" . $row["level3"] . "', '-', ''), '#', ''), '$', ''), '%', ''), '" . chr(38) . "', ''), '(', ''), ')', ''), '*', ''), ',', ''), '.', ''), '/', ''), ':', ''), ';', ''), '?', ''), '@', ''), '[', ''), ']', ''), '_', ''), '`', ''), '{', ''), '|', ''), '}', ''), '~', ''), '‘', ''), '‹', ''), '›', ''), '+', ''), '<', ''), '=', ''), '>', ''), '\'', ''), '\"', ''), ' ', ''), '---', ''), '--', '')";}
+	if((is_null($row["level4"])) || ($id == 0) || ($level < 4)) {$l4 = "";} else {$l4 = " AND replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(`level4`, '-', ''), '#', ''), '$', ''), '%', ''), '" . chr(38) . "', ''), '(', ''), ')', ''), '*', ''), ',', ''), '.', ''), '/', ''), ':', ''), ';', ''), '?', ''), '@', ''), '[', ''), ']', ''), '_', ''), '`', ''), '{', ''), '|', ''), '}', ''), '~', ''), '‘', ''), '‹', ''), '›', ''), '+', ''), '<', ''), '=', ''), '>', ''), '\'', ''), '\"', ''), ' ', ''), '---', ''), '--', '') = replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace('" . $row["level4"] . "', '-', ''), '#', ''), '$', ''), '%', ''), '" . chr(38) . "', ''), '(', ''), ')', ''), '*', ''), ',', ''), '.', ''), '/', ''), ':', ''), ';', ''), '?', ''), '@', ''), '[', ''), ']', ''), '_', ''), '`', ''), '{', ''), '|', ''), '}', ''), '~', ''), '‘', ''), '‹', ''), '›', ''), '+', ''), '<', ''), '=', ''), '>', ''), '\'', ''), '\"', ''), ' ', ''), '---', ''), '--', '')";}
+	if((is_null($row["level5"])) || ($id == 0) || ($level < 5)) {$l5 = "";} else {$l5 = " AND replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(`level5`, '-', ''), '#', ''), '$', ''), '%', ''), '" . chr(38) . "', ''), '(', ''), ')', ''), '*', ''), ',', ''), '.', ''), '/', ''), ':', ''), ';', ''), '?', ''), '@', ''), '[', ''), ']', ''), '_', ''), '`', ''), '{', ''), '|', ''), '}', ''), '~', ''), '‘', ''), '‹', ''), '›', ''), '+', ''), '<', ''), '=', ''), '>', ''), '\'', ''), '\"', ''), ' ', ''), '---', ''), '--', '') = replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace('" . $row["level5"] . "', '-', ''), '#', ''), '$', ''), '%', ''), '" . chr(38) . "', ''), '(', ''), ')', ''), '*', ''), ',', ''), '.', ''), '/', ''), ':', ''), ';', ''), '?', ''), '@', ''), '[', ''), ']', ''), '_', ''), '`', ''), '{', ''), '|', ''), '}', ''), '~', ''), '‘', ''), '‹', ''), '›', ''), '+', ''), '<', ''), '=', ''), '>', ''), '\'', ''), '\"', ''), ' ', ''), '---', ''), '--', '')";}
+	if((is_null($row["level6"])) || ($id == 0) || ($level < 6)) {$l6 = "";} else {$l6 = " AND replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(`level6`, '-', ''), '#', ''), '$', ''), '%', ''), '" . chr(38) . "', ''), '(', ''), ')', ''), '*', ''), ',', ''), '.', ''), '/', ''), ':', ''), ';', ''), '?', ''), '@', ''), '[', ''), ']', ''), '_', ''), '`', ''), '{', ''), '|', ''), '}', ''), '~', ''), '‘', ''), '‹', ''), '›', ''), '+', ''), '<', ''), '=', ''), '>', ''), '\'', ''), '\"', ''), ' ', ''), '---', ''), '--', '') = replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace('" . $row["level6"] . "', '-', ''), '#', ''), '$', ''), '%', ''), '" . chr(38) . "', ''), '(', ''), ')', ''), '*', ''), ',', ''), '.', ''), '/', ''), ':', ''), ';', ''), '?', ''), '@', ''), '[', ''), ']', ''), '_', ''), '`', ''), '{', ''), '|', ''), '}', ''), '~', ''), '‘', ''), '‹', ''), '›', ''), '+', ''), '<', ''), '=', ''), '>', ''), '\'', ''), '\"', ''), ' ', ''), '---', ''), '--', '')";}
+	if((is_null($row["level7"])) || ($id == 0) || ($level < 7)) {$l7 = "";} else {$l7 = " AND replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(`level7`, '-', ''), '#', ''), '$', ''), '%', ''), '" . chr(38) . "', ''), '(', ''), ')', ''), '*', ''), ',', ''), '.', ''), '/', ''), ':', ''), ';', ''), '?', ''), '@', ''), '[', ''), ']', ''), '_', ''), '`', ''), '{', ''), '|', ''), '}', ''), '~', ''), '‘', ''), '‹', ''), '›', ''), '+', ''), '<', ''), '=', ''), '>', ''), '\'', ''), '\"', ''), ' ', ''), '---', ''), '--', '') = replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace('" . $row["level7"] . "', '-', ''), '#', ''), '$', ''), '%', ''), '" . chr(38) . "', ''), '(', ''), ')', ''), '*', ''), ',', ''), '.', ''), '/', ''), ':', ''), ';', ''), '?', ''), '@', ''), '[', ''), ']', ''), '_', ''), '`', ''), '{', ''), '|', ''), '}', ''), '~', ''), '‘', ''), '‹', ''), '›', ''), '+', ''), '<', ''), '=', ''), '>', ''), '\'', ''), '\"', ''), ' ', ''), '---', ''), '--', '')";}
+
+	echo "<label for=\"level" . $level . "\">Level " . $level . " Taxonomy</label><select name=\"level" . $level . "\"><option value=\"NULL\"";
+	if($id == 0){echo " selected ";}
+	echo "></option>";	
+
+	$levelSQL = "SELECT DISTINCT `level" . $level . "` as `values` FROM  `" . $GLOBALS["schema"] . "`.`mc_taxonomy` WHERE `merchant_id` = '" . $GLOBALS["merchantID"] . "' " . $l1 . $l2 . $l3 . $l4 . $l5 . $l6 . $l7 . ";";
+	$levelQuery = mysql_query($levelSQL);
+	echo $levelSQL;
+	while($levelRow = mysql_fetch_array($levelQuery)){
+		echo "<option value=\"" . $levelRow["values"] . "\">" . $levelRow["values"] . "</option>";
+	}	
+
+	echo "</select><br/>";
+}
+
 
 ?>

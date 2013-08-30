@@ -9,7 +9,7 @@ function sec_session_start() {
         session_set_cookie_params($cookieParams["lifetime"], $cookieParams["path"], $cookieParams["domain"], $secure, $httponly); 
         session_name($session_name); // Sets the session name to the one set above.
         @session_start(); // Start the php session
-        session_regenerate_id(); // regenerated the session, delete the old one.  
+        @session_regenerate_id(); // regenerated the session, delete the old one.  
 }
 
 function login($email, $password, $mysqli) {

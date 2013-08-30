@@ -4,11 +4,13 @@ require ('functions.php');
 sec_session_start();
 
 if(login_check($mysqli) == true) {
+
 	function removeExclusion(){
 		$sql = "DELETE FROM `" . $GLOBALS["schema"] . "`.`merchant_exclusion` WHERE `id`='" . $_POST["id"] . "' and`exclusion`='" . $_POST["merchantID"] . "';";
 		mysql_query($sql) or die("Could not connect to MySQLi: " . mysql_error());
 		header("Location: ../index.php?f=" . $_POST["merch"] ."&p=exmng");
 	}
+
 	function addExclusion(){
 		//check to see if exclusion already exisits
 		$checkSql = "SELECT `id` FROM `" . $GLOBALS["schema"] . "`.`merchant_exclusion` WHERE `id_product`='" . $_POST["id_product"] . "' and`exclusion`='" . $_POST["merchantID"] . "';";
@@ -34,6 +36,7 @@ if(login_check($mysqli) == true) {
 	if(isset($_POST["submitAdd"])){
 		addExclusion();
 	}
+	
 } else {
 	echo "you do not have permissions to view this, please login.";}
 

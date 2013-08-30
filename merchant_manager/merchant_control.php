@@ -5,7 +5,7 @@
 require("feed_config/config_functions.php");
 
 if(isset($_GET["fieldID"])){
-	echo "<h2>" . $GLOBALS["merchant"] . " Feed Settings</h2>";
+	echo "<h1>" . $GLOBALS["merchant"] . " Feed Settings</h1>";
 	displayFieldConfig();
 } else {
 	echo "
@@ -27,7 +27,7 @@ if(isset($_GET["fieldID"])){
 	<a class=\"button\" href=\"functions/merchant_create.php?f=" . $GLOBALS["merch"] . "\" title=\"Create New File\">Create New " . $GLOBALS["merchant"] . " Merchant File</a>
 	<a class=\"button\" href=\"functions/merchant_create.php?f=" . $GLOBALS["merch"] . "&del=true\" title=\"\">Purge Current File</a>
 	<a class=\"button\" href=\"submissions/AHS_" . $GLOBALS["merchantID"] . "_product_submission.txt\" target=\"_blank\" title=\"Download Merchant File - CURRENT SIZE: " . $fileSize . " MB\">Download " . $GLOBALS["merchant"] ." Merchant File</a>
-	<a class=\"button\" href=\"" . $_SERVER["PHP_SELF"] . "?f=" . $GLOBALS["merch"] . "&p=exmng\" title=\"Manage Exclusions\">Manage " . $GLOBALS["merchant"] ." Exclusions</a>
+	<a class=\"button\" href=\"" . $_SERVER["PHP_SELF"] . "?f=" . $GLOBALS["merch"] . "&p=exmng\" title=\"Manage Exclusions\">Manage " . $GLOBALS["merchant"] ." Exclusions</a>". taxonomyButton() . "
 	<br/>
 	<div class=\"notes\">
 	  <h2>File Information</h2>

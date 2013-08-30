@@ -27,24 +27,5 @@ function googleIdentifier_exists($alias){
 		else 'FALSE'
 	end) AS `" . $alias . "`";
 	}
-function googleProduct_type($alias){
-	return "(case
-		when isnull(`a5`.`catName1`) then NULL
-		when isnull(`a5`.`catName2`) then `a5`.`catName1`
-		when isnull(`a5`.`catName3`) then concat(`a5`.`catName1`, ' > ', `a5`.`catName2`)
-		when
-			((`a5`.`catName1` is not null)
-				and (`a5`.`catName2` is not null)
-				and (`a5`.`catName3` is not null))
-		then
-			concat(`a5`.`catName1`,
-					' > ',
-					`a5`.`catName2`,
-					' > ',
-					`a5`.`catName3`)
-		else NULL
-	end) AS `" . $alias . "`";
-	}
 	
-
 ?>

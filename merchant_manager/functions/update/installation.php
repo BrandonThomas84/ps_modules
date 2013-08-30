@@ -48,4 +48,33 @@ CREATE TABLE `" . $schema . "`.`merchant_exclusion` (
   PRIMARY KEY (`id`,`id_product`,`exclusion`),
   UNIQUE KEY `id_UNIQUE` (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=21 DEFAULT CHARSET=latin1;";
+
+
+//create google taxonomy table
+$createTableGoogleTaxonomy = "
+CREATE TABLE `" . $schema . "`.`mc_taxonomy` (
+  `id` INT NOT NULL AUTO_INCREMENT,
+  `merchant_id` VARCHAR(255) NOT NULL,
+  `level1` VARCHAR(255) NOT NULL,
+  `level2` VARCHAR(255) NULL,
+  `level3` VARCHAR(255) NULL,
+  `level4` VARCHAR(255) NULL,
+  `level5` VARCHAR(255) NULL,
+  `level6` VARCHAR(255) NULL,
+  `level7` VARCHAR(255) NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE INDEX `id_UNIQUE` (`id` ASC));";
+
+//create taxonomy mapping table
+$createTaxonomyMapping = "
+CREATE TABLE `" . $schema . "`.`mc_cattax_mapping` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `category_string` varchar(255) NOT NULL,
+  `cattax_id` int(11) DEFAULT NULL,
+  `cattax_merchant_id` varchar(50) NOT NULL,
+  PRIMARY KEY (`id`,`category_string`,`cattax_mechant_id`),
+  UNIQUE KEY `idmc_cattax_conversion_UNIQUE` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+
+"
 ?>
