@@ -1,6 +1,7 @@
 <?php
-require($_SERVER["DOCUMENT_ROOT"] . "/ps_modules/merchant_manager/functions/db_connect.php");
-require($_SERVER["DOCUMENT_ROOT"] . "/ps_modules/merchant_manager/functions/login/login_functions.php");
+require("db_connect.php");
+require("login/login_functions.php");
+include("taxonomy.php");
 ////////////////////////////////////////////////////////////////////////
 // General Functions
 ////////////////////////////////////////////////////////////////////////	
@@ -41,7 +42,7 @@ if(isset($_GET["f"])){
 }
 
 function feedConfigSelected($needle,$haystack){
-	if($needle === "NULL" || $needle === "N/A"){return "";
+	if($needle === "NULL" || $needle === "N/A" || $needle == ""){return "";
 	} elseif($needle == $haystack){return " selected ";
 		}
 }
@@ -62,10 +63,6 @@ function navGeneration(){
     </a>";}
 	
 	echo "
-	<hr><br>
-	<a href=\"./index.php?f=exmng\" title=\"Manage Product Exclusions\">
-    	<li " . navActiveClass(array("1",@$_GET["ex"])) . ">Manage Product Exclusions</li>
-	</a>
 	<hr><br>
 	<a href=\"./index.php?p=usrreg\" title=\"Create New User\">
     	<li " . navActiveClass(array("1",@$_GET["ex"])) . ">Create New User</li>
@@ -459,87 +456,6 @@ function productCategory($alias){
 					`a5`.`catName7`)		
 		else NULL
 	end) AS `" . $alias . "`";
-}
-
-//creates an option list containing all the categories that are currently configured in the prestashop database (up to 7 levels)
-function distinctProductCategoryOptionList(){
-	$sql = "SELECT DISTINCT " . productCategory("product_type") .  reportQueryFrom() . reportQueryWhere();
-	$query = mysql_query($sql);
-	
-	echo "<select name=\"categories\">";
-	while($row = mysql_fetch_array($query)){
-		echo "<option value=\"" . $row["product_type"] . "\">" . $row["product_type"] . "</option>";
-	}
-	echo "</select>";
-}
-
-//instructs the merchant manager page to display the configure taxonomy button if there is a standard dataset present in the database
-function taxonomyButton(){
-	$sql = "SELECT DISTINCT `a2`.`merchant_id` FROM `testashop`.`mc_taxonomy` AS `a1` INNER JOIN `testashop`.`merchant_center_select_config` AS `a2` ON `a1`.`merchant_id` = `a2`.`merchant_id` WHERE `a1`.`merchant_id` = '" . $GLOBALS["merchantID"] . "';";
-	$query = mysql_query($sql);
-	if(mysql_num_rows($query) > 0){
-		return "<a class=\"button\" href=\"" . $_SERVER["PHP_SELF"] . "?f=" . $GLOBALS["merch"] . "&p=tax\" title=\"Product Taxonomy\">" . $GLOBALS["merchant"] ." Product Taxonomy</a>";
-	}
-}
-
-//creates and option list that will display a list of the acceptable taxonomy values for the current merchant
-function taxonomyDisplay($level,$parent){
-	$sql = "SELECT DISTINCT `level" . $level . "` AS `taxonomy`, `merchant_id`, `id` FROM `" . $GLOBALS["schema"] . "`.`mc_taxonomy` WHERE `merchant_id` = '" . $GLOBALS["merchantID"] . "';";
-	$query = mysql_query($sql);
-
-	echo "<select name=\"level" . $level . "\">";
-	while($row = mysql_fetch_array($query)){
-		echo "<option value=\"" . $row["taxonomy"] . "\">" . $row["taxonomy"] . "</option>";
-	}
-	echo "</select>";
-}
-
-//check to see if there is already a mapped value for this category if not it will insert the value into the database table if there is it returns the taxonomy id that is being used
-function categoryToTaxCheck($category){
-	$sql = "SELECT * FROM `" . $GLOBALS["schema"] . "`.`mc_cattax_mapping` WHERE `cattax_merchant_id` = '" . $GLOBALS["merchantID"] . "' AND `category_string` =  '" . $category . "';";
-	$query = mysql_query($sql);
-	$numRows = mysql_num_rows($query);
-	$row = mysql_fetch_array($query);
-	
-	if($numRows == 0){
-		$insert = "INSERT INTO `" . $GLOBALS["schema"] . "`.`mc_cattax_mapping` (`category_string`,`cattax_merchant_id`) VALUES ('$category','" . $GLOBALS["merchantID"] . "');";
-		$query2 = mysql_query($insert);
-
-		return 0;
-	} else {
-		return $row["cattax_id"];
-	}
-}
-
-function displayTaxOptionList($level,$id){
-	
-	if($id == 0){$where = "";} else {$where = " WHERE `id` = '" . $id . "';";}
-
-	$sql = "SELECT DISTINCT `level1`,`level2`,`level3`,`level4`,`level5`,`level6`,`level7` FROM `" . $GLOBALS["schema"] . "`.`mc_taxonomy`" . $where;
-	$query = mysql_query($sql);
-	$row = mysql_fetch_array($query);
-	$c = 0;
-
-	if((is_null($row["level1"])) || ($id == 0)) {$l1 = ""; } else {$l1 = " AND replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(`level1`, '-', ''), '#', ''), '$', ''), '%', ''), '" . chr(38) . "', ''), '(', ''), ')', ''), '*', ''), ',', ''), '.', ''), '/', ''), ':', ''), ';', ''), '?', ''), '@', ''), '[', ''), ']', ''), '_', ''), '`', ''), '{', ''), '|', ''), '}', ''), '~', ''), '‘', ''), '‹', ''), '›', ''), '+', ''), '<', ''), '=', ''), '>', ''), '\'', ''), '\"', ''), ' ', ''), '---', ''), '--', '') = replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace('" . $row["level1"] . "', '-', ''), '#', ''), '$', ''), '%', ''), '" . chr(38) . "', ''), '(', ''), ')', ''), '*', ''), ',', ''), '.', ''), '/', ''), ':', ''), ';', ''), '?', ''), '@', ''), '[', ''), ']', ''), '_', ''), '`', ''), '{', ''), '|', ''), '}', ''), '~', ''), '‘', ''), '‹', ''), '›', ''), '+', ''), '<', ''), '=', ''), '>', ''), '\'', ''), '\"', ''), ' ', ''), '---', ''), '--', '')";} 
-	if((is_null($row["level2"])) || ($id == 0) || ($level < 2)) {$l2 = "";} else {$l2 = " AND replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(`level2`, '-', ''), '#', ''), '$', ''), '%', ''), '" . chr(38) . "', ''), '(', ''), ')', ''), '*', ''), ',', ''), '.', ''), '/', ''), ':', ''), ';', ''), '?', ''), '@', ''), '[', ''), ']', ''), '_', ''), '`', ''), '{', ''), '|', ''), '}', ''), '~', ''), '‘', ''), '‹', ''), '›', ''), '+', ''), '<', ''), '=', ''), '>', ''), '\'', ''), '\"', ''), ' ', ''), '---', ''), '--', '') = replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace('" . $row["level2"] . "', '-', ''), '#', ''), '$', ''), '%', ''), '" . chr(38) . "', ''), '(', ''), ')', ''), '*', ''), ',', ''), '.', ''), '/', ''), ':', ''), ';', ''), '?', ''), '@', ''), '[', ''), ']', ''), '_', ''), '`', ''), '{', ''), '|', ''), '}', ''), '~', ''), '‘', ''), '‹', ''), '›', ''), '+', ''), '<', ''), '=', ''), '>', ''), '\'', ''), '\"', ''), ' ', ''), '---', ''), '--', '')";}
-	if((is_null($row["level3"])) || ($id == 0) || ($level < 3)) {$l3 = "";} else {$l3 = " AND replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(`level3`, '-', ''), '#', ''), '$', ''), '%', ''), '" . chr(38) . "', ''), '(', ''), ')', ''), '*', ''), ',', ''), '.', ''), '/', ''), ':', ''), ';', ''), '?', ''), '@', ''), '[', ''), ']', ''), '_', ''), '`', ''), '{', ''), '|', ''), '}', ''), '~', ''), '‘', ''), '‹', ''), '›', ''), '+', ''), '<', ''), '=', ''), '>', ''), '\'', ''), '\"', ''), ' ', ''), '---', ''), '--', '') = replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace('" . $row["level3"] . "', '-', ''), '#', ''), '$', ''), '%', ''), '" . chr(38) . "', ''), '(', ''), ')', ''), '*', ''), ',', ''), '.', ''), '/', ''), ':', ''), ';', ''), '?', ''), '@', ''), '[', ''), ']', ''), '_', ''), '`', ''), '{', ''), '|', ''), '}', ''), '~', ''), '‘', ''), '‹', ''), '›', ''), '+', ''), '<', ''), '=', ''), '>', ''), '\'', ''), '\"', ''), ' ', ''), '---', ''), '--', '')";}
-	if((is_null($row["level4"])) || ($id == 0) || ($level < 4)) {$l4 = "";} else {$l4 = " AND replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(`level4`, '-', ''), '#', ''), '$', ''), '%', ''), '" . chr(38) . "', ''), '(', ''), ')', ''), '*', ''), ',', ''), '.', ''), '/', ''), ':', ''), ';', ''), '?', ''), '@', ''), '[', ''), ']', ''), '_', ''), '`', ''), '{', ''), '|', ''), '}', ''), '~', ''), '‘', ''), '‹', ''), '›', ''), '+', ''), '<', ''), '=', ''), '>', ''), '\'', ''), '\"', ''), ' ', ''), '---', ''), '--', '') = replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace('" . $row["level4"] . "', '-', ''), '#', ''), '$', ''), '%', ''), '" . chr(38) . "', ''), '(', ''), ')', ''), '*', ''), ',', ''), '.', ''), '/', ''), ':', ''), ';', ''), '?', ''), '@', ''), '[', ''), ']', ''), '_', ''), '`', ''), '{', ''), '|', ''), '}', ''), '~', ''), '‘', ''), '‹', ''), '›', ''), '+', ''), '<', ''), '=', ''), '>', ''), '\'', ''), '\"', ''), ' ', ''), '---', ''), '--', '')";}
-	if((is_null($row["level5"])) || ($id == 0) || ($level < 5)) {$l5 = "";} else {$l5 = " AND replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(`level5`, '-', ''), '#', ''), '$', ''), '%', ''), '" . chr(38) . "', ''), '(', ''), ')', ''), '*', ''), ',', ''), '.', ''), '/', ''), ':', ''), ';', ''), '?', ''), '@', ''), '[', ''), ']', ''), '_', ''), '`', ''), '{', ''), '|', ''), '}', ''), '~', ''), '‘', ''), '‹', ''), '›', ''), '+', ''), '<', ''), '=', ''), '>', ''), '\'', ''), '\"', ''), ' ', ''), '---', ''), '--', '') = replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace('" . $row["level5"] . "', '-', ''), '#', ''), '$', ''), '%', ''), '" . chr(38) . "', ''), '(', ''), ')', ''), '*', ''), ',', ''), '.', ''), '/', ''), ':', ''), ';', ''), '?', ''), '@', ''), '[', ''), ']', ''), '_', ''), '`', ''), '{', ''), '|', ''), '}', ''), '~', ''), '‘', ''), '‹', ''), '›', ''), '+', ''), '<', ''), '=', ''), '>', ''), '\'', ''), '\"', ''), ' ', ''), '---', ''), '--', '')";}
-	if((is_null($row["level6"])) || ($id == 0) || ($level < 6)) {$l6 = "";} else {$l6 = " AND replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(`level6`, '-', ''), '#', ''), '$', ''), '%', ''), '" . chr(38) . "', ''), '(', ''), ')', ''), '*', ''), ',', ''), '.', ''), '/', ''), ':', ''), ';', ''), '?', ''), '@', ''), '[', ''), ']', ''), '_', ''), '`', ''), '{', ''), '|', ''), '}', ''), '~', ''), '‘', ''), '‹', ''), '›', ''), '+', ''), '<', ''), '=', ''), '>', ''), '\'', ''), '\"', ''), ' ', ''), '---', ''), '--', '') = replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace('" . $row["level6"] . "', '-', ''), '#', ''), '$', ''), '%', ''), '" . chr(38) . "', ''), '(', ''), ')', ''), '*', ''), ',', ''), '.', ''), '/', ''), ':', ''), ';', ''), '?', ''), '@', ''), '[', ''), ']', ''), '_', ''), '`', ''), '{', ''), '|', ''), '}', ''), '~', ''), '‘', ''), '‹', ''), '›', ''), '+', ''), '<', ''), '=', ''), '>', ''), '\'', ''), '\"', ''), ' ', ''), '---', ''), '--', '')";}
-	if((is_null($row["level7"])) || ($id == 0) || ($level < 7)) {$l7 = "";} else {$l7 = " AND replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(`level7`, '-', ''), '#', ''), '$', ''), '%', ''), '" . chr(38) . "', ''), '(', ''), ')', ''), '*', ''), ',', ''), '.', ''), '/', ''), ':', ''), ';', ''), '?', ''), '@', ''), '[', ''), ']', ''), '_', ''), '`', ''), '{', ''), '|', ''), '}', ''), '~', ''), '‘', ''), '‹', ''), '›', ''), '+', ''), '<', ''), '=', ''), '>', ''), '\'', ''), '\"', ''), ' ', ''), '---', ''), '--', '') = replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace('" . $row["level7"] . "', '-', ''), '#', ''), '$', ''), '%', ''), '" . chr(38) . "', ''), '(', ''), ')', ''), '*', ''), ',', ''), '.', ''), '/', ''), ':', ''), ';', ''), '?', ''), '@', ''), '[', ''), ']', ''), '_', ''), '`', ''), '{', ''), '|', ''), '}', ''), '~', ''), '‘', ''), '‹', ''), '›', ''), '+', ''), '<', ''), '=', ''), '>', ''), '\'', ''), '\"', ''), ' ', ''), '---', ''), '--', '')";}
-
-	echo "<label for=\"level" . $level . "\">Level " . $level . " Taxonomy</label><select name=\"level" . $level . "\"><option value=\"NULL\"";
-	if($id == 0){echo " selected ";}
-	echo "></option>";	
-
-	$levelSQL = "SELECT DISTINCT `level" . $level . "` as `values` FROM  `" . $GLOBALS["schema"] . "`.`mc_taxonomy` WHERE `merchant_id` = '" . $GLOBALS["merchantID"] . "' " . $l1 . $l2 . $l3 . $l4 . $l5 . $l6 . $l7 . ";";
-	$levelQuery = mysql_query($levelSQL);
-	echo $levelSQL;
-	while($levelRow = mysql_fetch_array($levelQuery)){
-		echo "<option value=\"" . $levelRow["values"] . "\">" . $levelRow["values"] . "</option>";
-	}	
-
-	echo "</select><br/>";
 }
 
 
