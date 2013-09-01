@@ -1,6 +1,9 @@
 <?php sec_session_start(); if(login_check($mysqli) == true) { ?>
 <?php
 
+if(isset($_GET["page"])){$pageNumber = $_GET["page"];} else {$pageNumber = 0;}
+if(isset($_GET["perpage"])){$perPage = $_GET["perpage"];} else {$perPage = 10;}
+
 function excludedProductsQuery(){
 	return "
 	SELECT DISTINCT 
@@ -32,18 +35,7 @@ function excludedProductsQuery(){
 	WHERE `a2`.`id` IS NOT NULL";
 }
 
-function displayExcludedProducts(){
-	if(isset($_GET["page"])){
-		$pageNumber = $_GET["page"];
-	} else {
-		$pageNumber = 0;
-	}
-
-	if(isset($_GET["perpage"])){
-		$perPage = $_GET["perpage"];
-	} else {
-		$perPage = 10;
-	}
+function displayExcludedProducts($pageNumber,$perPage){
 
 	$limitStart = $pageNumber*$perPage;
 	$limitRun = $perPage;
@@ -55,13 +47,15 @@ function displayExcludedProducts(){
 	while($row = mysql_fetch_array($query)){
 		echo "
 		<tr>
-		  <td><p>" . $row["id_product"] . "</p></td>
-		  <td><a target=\"_blank\" href=\"" . $row["link"] . "\" title=\"View Product\">Click Here</a></td>
-		  <td>
+		  <td style=\"width:120px; text-align:center;\"><p style=\"margin: 1px 0 2px 0;\">" . $row["id_product"] . "</p></td>
+		  <td style=\"width:240px; text-align:center;\"><a target=\"_blank\" href=\"" . $row["link"] . "\" title=\"View Product\">View Product</a></td>
+		  <td style=\"width: 120px; text-align: center;\">
 		  	<form action=\"functions/exclusion_manage.php\" name=\"removeProductExclusion\" method=\"POST\" enctype=\"application/x-www-form-urlencoded\" title=\"Remove [Product] from [Merchant] Exclusions\">
 		  		<input type=\"hidden\" name=\"id\" id=\"removeID\" value=\"" . $row["id"] . "\" >
 		  		<input type=\"hidden\" name=\"merchantID\" id=\"merchantID\" value=\"" . $GLOBALS["merchantID"] . "\" >
 		  		<input type=\"hidden\" name=\"merch\" id=\"merch\" value=\"" . $GLOBALS["merch"] . "\" >
+		  		<input type=\"hidden\" name=\"pageNumber\" id=\"pageNumber\" value=\"" . $pageNumber . "\" >
+		  		<input type=\"hidden\" name=\"perPage\" id=\"perPage\" value=\"" . $perPage . "\" >
 		  		<input type=\"submit\" value=\"Remove\" name=\"submitRemove\">
 		  	</form>
 		  </td>
@@ -69,9 +63,7 @@ function displayExcludedProducts(){
 	}
 }
 
-function pageNavigation(){
-	if(isset($_GET["page"])){$pageNumber = $_GET["page"];} else {$pageNumber = 0;}
-	if(isset($_GET["perpage"])){$perPage = $_GET["perpage"];} else {$perPage = 10;}
+function pageNavigation($pageNumber,$perPage){
 
 	$nextPage = $pageNumber+1;
 	
@@ -108,7 +100,7 @@ function pageNavigation(){
 	        			<option value=\"50\" " . feedConfigSelected(50,$perPage) . ">50</option>
 	        			<option value=\"100\" " . feedConfigSelected(100,$perPage) . ">100</option>
 	        		</select>
-			  		<input type=\"submit\" value=\"Change\" name=\"perPageSubmit\">
+			  		<input type=\"submit\" value=\"Change\">
 			  	</form>
 			</td>
 			<td class=\"pageControl\">" . $nextLinkDisplay . "</td>
@@ -117,7 +109,7 @@ function pageNavigation(){
 
 ?>
 
-<h1><?php echo $GLOBALS["merchant"]; ?></h1>
+<h1><?php echo $GLOBALS["merchant"]; ?> Exclusions</h1>
 <table border="1">
 	<thead style="background: #999; color: #fff;">
 	  <td colspan="3">
@@ -131,6 +123,8 @@ function pageNavigation(){
 		    <label for="addID">Enter Product Number</label>
 		    <input type="hidden" name="merchantID" id="merchantID" value="<?php echo $GLOBALS["merchantID"] ;?>">
 		  	<input type="hidden" name="merch" id="merch" value="<?php echo $GLOBALS["merch"] ;?>" >
+		  	<input type="hidden" name="pageNumber" id="pageNumber" value="<?php echo $pageNumber; ?>" >
+		  	<input type="hidden" name="perPage" id="perPage" value="<?php echo $perPage; ?>" >
 		  	<input type="text" size="30" maxlength="150" name="id_product" id="addID">
 		</td>
 		<td>
@@ -142,13 +136,13 @@ function pageNavigation(){
 <div class="clear"></div>
 <table border="1">
 	<thead style="background: #999; color: #fff;">
-		<td><strong>Product ID</strong></td>
-		<td><strong>Link<strong></td>
-		<td><strong>Action</strong></td>
+		<td style="width:120px; text-align:center;"><strong>Product ID</strong></td>
+		<td style="width:240px; text-align:center;"><strong>Link<strong></td>
+		<td style="width:120px; text-align:center;"><strong>Action</strong></td>
 	</thead>
 	<tbody>
-		<?php displayExcludedProducts(); ?>
-		<?php pageNavigation(); ?>
+		<?php displayExcludedProducts($pageNumber,$perPage); ?>
+		<?php pageNavigation($pageNumber,$perPage); ?>
 	</tbody>
 </table>
 <?php ;} ?>

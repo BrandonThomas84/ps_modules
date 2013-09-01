@@ -93,7 +93,7 @@ function messageReporting(){
 	if(isset($_GET["msg"])){
 		$msg = $_GET["msg"];
 		
-		if($msg == "er0001"){ 
+		if($msg == "er0001"){
 			$d = "errMod";
 			$m = "<p>Sorry...The field you are trying to edit has been disabled.</p><p>Please try another field.</p>";
 			} elseif($msg == "er0002"){
@@ -105,20 +105,23 @@ function messageReporting(){
 					} elseif($msg == "er0004"){
 						$d = "errMod";
 						$m = "<p>An exceiption for that product within this feed already exists</p>";
-						} elseif($msg == "sc0001"){
-							$d = "sucMod";
-							$m = "<p>Success! You have updated your feed settings!</p>";
-							} elseif($msg == "sc0002"){
+						} elseif($msg == "er0005"){
+							$d = "errMod";
+							$m = "<p>You have entered an invalid product ID (id_product)</p>";
+							} elseif($msg == "sc0001"){
 								$d = "sucMod";
-								$m = "<p>New File created successfully</p>";
-								} elseif($msg == "sc0003"){
+								$m = "<p>Success! You have updated your feed settings!</p>";
+								} elseif($msg == "sc0002"){
 									$d = "sucMod";
-									$m = "<p>Successfully Created new User</p>";
-									}elseif($msg == "sc0004"){
+									$m = "<p>New File created successfully</p>";
+									} elseif($msg == "sc0003"){
 										$d = "sucMod";
-										$m = "<p>You have successfully added a product to your exlcuions!</p>";
-										} 
-			return "
+										$m = "<p>Successfully Created new User</p>";
+										}elseif($msg == "sc0004"){
+											$d = "sucMod";
+											$m = "<p>You have successfully added a product to your exclusions!</p>";
+											} 
+				return "
 		<div class=\"$d\">
 			$m
 		</div>
