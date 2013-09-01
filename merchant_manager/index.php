@@ -43,7 +43,7 @@ if(login_check($mysqli) == true) {
 		} elseif (isset($config) && $config == "exmng"){
 			require ('merchant_exclusions.php');
 			} elseif (isset($config) && $config == "tax"){
-				require ('functions/product_taxonomy.php');
+				require ('product_taxonomy.php');
 				} else {
 					if(
 						!isset($GLOBALS["merch"]) || 

@@ -74,7 +74,7 @@ function levelWhere($level,$id){
 	return $l2 . $l3 . $l4 . $l5 . $l6 . $l7;
 }
 
-
+//creates drop down menu for next taxonomy level
 function displayTaxOptionList($level,$id){
 	//constucting the 'where' statement for the initial query to identify the current taxonomy
 	if($id == 0){$where = "";} else {$where = " WHERE `id` = '" . $id . "';";}
@@ -111,6 +111,7 @@ function displayTaxOptionList($level,$id){
 		}
 	}
 }
+
 //this will return a single string value of all the taxonomy levels that are currently assigned to the category
 function currentTaxonomy(){
 	//start counter

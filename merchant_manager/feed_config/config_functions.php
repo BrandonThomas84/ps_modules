@@ -35,7 +35,7 @@ function feedConfigStaticDisplay($value){
 	}
 }
 function feedConfigActive($value){
-	if($value === 'N'){return "<span class=\"inactiveField\">Inactive</span>";
+	if($value === 'N' || is_null($value)){return "<span class=\"inactiveField\">Inactive</span>";
 	} else {return "<span class=\"activeField\">Active</span>";
 		}
 }
