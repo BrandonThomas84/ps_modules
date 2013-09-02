@@ -1,8 +1,8 @@
 <?php
-require ('functions.php');
+require_once ('functions.php');
 
+//check for secure session 
 sec_session_start();
-
 if(login_check($mysqli) == true) {
 
 	function removeExclusion(){
@@ -34,17 +34,14 @@ if(login_check($mysqli) == true) {
 		}	
 	}
 
-	//checking to see if script will be removing an existing product exclusion
+	//determining qhich function to run
 	if(isset($_POST["submitRemove"])){
 		removeExclusion();
-	} 
-
-	//checking to see if script will be adding a new product exclusion
-	if(isset($_POST["submitAdd"])){
+	} elseif(isset($_POST["submitAdd"])){
 		addExclusion();
 	}
 	
 } else {
-	echo "you do not have permissions to view this, please login.";}
+	echo "You have attempted to access a secure page and must be logged in";}
 
 ?>

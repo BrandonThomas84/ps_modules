@@ -65,10 +65,10 @@ function navGeneration(){
 	echo "
 	<hr><br>
 	<a href=\"./index.php?p=usrreg\" title=\"Create New User\">
-    	<li " . navActiveClass(array("1",@$_GET["ex"])) . ">Create New User</li>
+    	<li " . navActiveClass(array("usrreg",@$_GET["p"])) . ">Create New User</li>
 	</a>
 	<a href=\"./functions/login/logout.php\" title=\"Logout\">
-    	<li " . navActiveClass(array("1",@$_GET["ex"])) . ">Logout</li>
+    	<li>Logout</li>
 	</a>";
 }
 
@@ -117,10 +117,13 @@ function messageReporting(){
 									} elseif($msg == "sc0003"){
 										$d = "sucMod";
 										$m = "<p>Successfully Created new User</p>";
-										}elseif($msg == "sc0004"){
+										} elseif($msg == "sc0004"){
 											$d = "sucMod";
 											$m = "<p>You have successfully added a product to your exclusions!</p>";
-											} 
+											} elseif($msg == "sc0005"){
+												$d = "sucMod";
+												$m = "<p>Error successfully reported.</p><p>Thank you for your participation.</p>";
+												} 
 				return "
 		<div class=\"$d\">
 			$m
@@ -155,125 +158,237 @@ function reportQuerySelect(){
 
 //create query portion - "from"
 function reportQueryFrom(){
-	return " FROM `" . $GLOBALS["schema"] . "`.`" . $GLOBALS["tableLead"] . "product` `a1` 
-	INNER JOIN `" . $GLOBALS["schema"] . "`.`" . $GLOBALS["tableLead"] . "manufacturer` `a2` 
-	ON `a1`.`id_manufacturer` = `a2`.`id_manufacturer`
-	INNER JOIN `" . $GLOBALS["schema"] . "`.`" . $GLOBALS["tableLead"] . "product_lang` `a3` 
-	ON `a3`.`id_product` = `a1`.`id_product`
-	
-	INNER JOIN 
-		(SELECT 
-			`url1`.`id_product` AS `id_product`,
-			`url2`.`link_rewrite` AS `link_rewrite` 
-		 FROM `" . $GLOBALS["schema"] . "`.`" . $GLOBALS["tableLead"] . "category_product` `url1` 
-			INNER JOIN `" . $GLOBALS["schema"] . "`.`" . $GLOBALS["tableLead"] . "category_lang` `url2` 
-			ON `url1`.`id_category` = `url2`.`id_category`
-		 WHERE `url2`.`id_category` NOT IN (1 , 2)
-		 GROUP BY `url1`.`id_product` 
-		 ORDER BY `url1`.`id_product` 
-		) `a4` 
-	ON `a4`.`id_product` = `a1`.`id_product`
-	LEFT JOIN 
-		(
-		 SELECT `prd`.`id_product` AS `id_product`,
-			`prd_type`.`catName1` AS `catName1`,
-			`prd_type`.`catName2` AS `catName2`,
-			`prd_type`.`catName3` AS `catName3`,
-			`prd_type`.`catName3` AS `catName4`,
-			`prd_type`.`catName3` AS `catName5`,
-			`prd_type`.`catName3` AS `catName6`,
-			`prd_type`.`catName3` AS `catName7` 
-		 FROM
-			(
-				SELECT `crmb1`.`id_category` AS `prd_category1`,
-					`crmb2`.`id_category` AS `prd_category2`,
-					`crmb3`.`id_category` AS `prd_category3`,
-					`crmb4`.`id_category` AS `prd_category4`,
-					`crmb5`.`id_category` AS `prd_category5`,
-					`crmb6`.`id_category` AS `prd_category6`,
-					`crmb1`.`name` AS `catName1`,
-					`crmb2`.`name` AS `catName2`,
-					`crmb3`.`name` AS `catName3`, 
-					`crmb4`.`name` AS `catName4`,
-					`crmb5`.`name` AS `catName5`,
-					`crmb6`.`name` AS `catName6`
-					 FROM 
-						(SELECT `nam`.`name` AS `name`,
-							`num`.`id_category` AS `id_category`,
-							`num`.`id_parent` AS `id_parent`
-						 FROM `" . $GLOBALS["schema"] . "`.`" . $GLOBALS["tableLead"] . "category` `num` 
-						 INNER JOIN `" . $GLOBALS["schema"] . "`.`" . $GLOBALS["tableLead"] . "category_lang` `nam` 
-						 ON `num`.`id_category` = `nam`.`id_category`
-						 WHERE `num`.`active` = 1
-						) `crmb1` 
-					LEFT JOIN 
-						(SELECT `nam`.`name` AS `name`, 
-							`num`.`id_category` AS `id_category`, 
-							`num`.`id_parent` AS `id_parent` 
-						 FROM `" . $GLOBALS["schema"] . "`.`" . $GLOBALS["tableLead"] . "category` `num` 
-						 INNER JOIN `" . $GLOBALS["schema"] . "`.`" . $GLOBALS["tableLead"] . "category_lang` `nam` 
-						 ON `num`.`id_category` = `nam`.`id_category`
-						 WHERE `num`.`active` = 1 
-						) `crmb2` 
-					ON `crmb2`.`id_parent` = `crmb1`.`id_category`
-					LEFT JOIN 
-						(SELECT `nam`.`name` AS `name`,
-							`num`.`id_category` AS `id_category`,
-							`num`.`id_parent` AS `id_parent` 
-						 FROM `" . $GLOBALS["schema"] . "`.`" . $GLOBALS["tableLead"] . "category` `num` 
-						 INNER JOIN `" . $GLOBALS["schema"] . "`.`" . $GLOBALS["tableLead"] . "category_lang` `nam` 
-						 ON `num`.`id_category` = `nam`.`id_category`
-						 WHERE `num`.`active` = 1
-						) `crmb3` 
-					ON `crmb3`.`id_parent` = `crmb2`.`id_category`
-					LEFT JOIN 
-						(SELECT `nam`.`name` AS `name`,
-							`num`.`id_category` AS `id_category`,
-							`num`.`id_parent` AS `id_parent` 
-						 FROM `" . $GLOBALS["schema"] . "`.`" . $GLOBALS["tableLead"] . "category` `num` 
-						 INNER JOIN `" . $GLOBALS["schema"] . "`.`" . $GLOBALS["tableLead"] . "category_lang` `nam` 
-						 ON `num`.`id_category` = `nam`.`id_category`
-						 WHERE `num`.`active` = 1
-						) `crmb4` 
-					ON `crmb4`.`id_parent` = `crmb3`.`id_category`
-					LEFT JOIN 
-						(SELECT `nam`.`name` AS `name`,
-							`num`.`id_category` AS `id_category`,
-							`num`.`id_parent` AS `id_parent` 
-						 FROM `" . $GLOBALS["schema"] . "`.`" . $GLOBALS["tableLead"] . "category` `num` 
-						 INNER JOIN `" . $GLOBALS["schema"] . "`.`" . $GLOBALS["tableLead"] . "category_lang` `nam` 
-						 ON `num`.`id_category` = `nam`.`id_category`
-						 WHERE `num`.`active` = 1
-						) `crmb5` 
-					ON `crmb5`.`id_parent` = `crmb4`.`id_category`
-					LEFT JOIN 
-						(SELECT `nam`.`name` AS `name`,
-							`num`.`id_category` AS `id_category`,
-							`num`.`id_parent` AS `id_parent` 
-						 FROM `" . $GLOBALS["schema"] . "`.`" . $GLOBALS["tableLead"] . "category` `num` 
-						 INNER JOIN `" . $GLOBALS["schema"] . "`.`" . $GLOBALS["tableLead"] . "category_lang` `nam` 
-						 ON `num`.`id_category` = `nam`.`id_category`
-						 WHERE `num`.`active` = 1
-						) `crmb6` 
-					ON `crmb6`.`id_parent` = `crmb5`.`id_category`
-					LEFT JOIN 
-						(SELECT `nam`.`name` AS `name`,
-							`num`.`id_category` AS `id_category`,
-							`num`.`id_parent` AS `id_parent` 
-						 FROM `" . $GLOBALS["schema"] . "`.`" . $GLOBALS["tableLead"] . "category` `num` 
-						 INNER JOIN `" . $GLOBALS["schema"] . "`.`" . $GLOBALS["tableLead"] . "category_lang` `nam` 
-						 ON `num`.`id_category` = `nam`.`id_category`
-						 WHERE `num`.`active` = 1
-						) `crmb7` 
-					ON `crmb7`.`id_parent` = `crmb6`.`id_category`
-				WHERE `crmb1`.`id_category` NOT IN (1 , 2)
-			) `prd_type` 
-			LEFT JOIN `" . $GLOBALS["schema"] . "`.`" . $GLOBALS["tableLead"] . "category_product` `prd` 
-			ON `prd`.`id_category` = coalesce(`prd_type`.`prd_category6`,`prd_type`.`prd_category5`,`prd_type`.`prd_category4`,`prd_type`.`prd_category3`, `prd_type`.`prd_category2`, `prd_type`.`prd_category1`) 
-			GROUP BY `prd`.`id_product` 
-			ORDER BY `prd_type`.`prd_category1` 
-		) `a5` 
-		ON `a5`.`id_product` = `a1`.`id_product` ";
+	return " 
+	FROM
+    `" . $GLOBALS["schema"] . "`.`" . $GLOBALS["tableLead"] . "product` AS `a1`
+        LEFT JOIN
+    `" . $GLOBALS["schema"] . "`.`" . $GLOBALS["tableLead"] . "manufacturer` AS `a2` ON `a1`.`id_manufacturer` = `a2`.`id_manufacturer`
+        LEFT JOIN
+    `" . $GLOBALS["schema"] . "`.`" . $GLOBALS["tableLead"] . "product_lang` AS `a3` ON `a3`.`id_product` = `a1`.`id_product`
+        LEFT JOIN
+    (SELECT 
+        `url1`.`id_product` AS `id_product`,
+            `url2`.`link_rewrite` AS `link_rewrite`
+    FROM
+        `" . $GLOBALS["schema"] . "`.`" . $GLOBALS["tableLead"] . "category_product` `url1`
+    INNER JOIN `" . $GLOBALS["schema"] . "`.`" . $GLOBALS["tableLead"] . "category_lang` `url2` ON `url1`.`id_category` = `url2`.`id_category`
+    WHERE
+        `url2`.`id_category` NOT IN (1 , 2)
+    GROUP BY `url1`.`id_product`
+    ORDER BY `url1`.`id_product`) AS `a4` ON `a4`.`id_product` = `a1`.`id_product`
+        INNER JOIN
+    (SELECT DISTINCT
+        `prd`.`id_product` AS `id_product`,
+            (CASE
+                WHEN
+                    CONCAT((CASE
+                        WHEN `tax`.`level1` IS NULL THEN ''
+                        ELSE `tax`.`level1`
+                    END), (CASE
+                        WHEN `tax`.`level2` IS NULL THEN ''
+                        ELSE CONCAT(' > ', `tax`.`level2`)
+                    END), (CASE
+                        WHEN `tax`.`level3` IS NULL THEN ''
+                        ELSE CONCAT(' > ', `tax`.`level3`)
+                    END), (CASE
+                        WHEN `tax`.`level4` IS NULL THEN ''
+                        ELSE CONCAT(' > ', `tax`.`level4`)
+                    END), (CASE
+                        WHEN `tax`.`level5` IS NULL THEN ''
+                        ELSE CONCAT(' > ', `tax`.`level5`)
+                    END), (CASE
+                        WHEN `tax`.`level6` IS NULL THEN ''
+                        ELSE CONCAT(' > ', `tax`.`level6`)
+                    END), (CASE
+                        WHEN `tax`.`level7` IS NULL THEN ''
+                        ELSE CONCAT(' > ', `tax`.`level7`)
+                    END)) = ''
+                THEN
+                    CONCAT((CASE
+                		WHEN `category_string`.`catName1` IS NULL THEN ''
+                		ELSE `category_string`.`catName1`
+		            END),
+		            (CASE
+		                WHEN `category_string`.`catName2` IS NULL THEN ''
+		                ELSE CONCAT(' > ' + `category_string`.`catName2`)
+		            END),
+		            (CASE
+		                WHEN `category_string`.`catName3` IS NULL THEN ''
+		                ELSE CONCAT(' > ' + `category_string`.`catName3`)
+		            END),
+		            (CASE
+		                WHEN `category_string`.`catName4` IS NULL THEN ''
+		                ELSE CONCAT(' > ' + `category_string`.`catName4`)
+		            END),
+		            (CASE
+		                WHEN `category_string`.`catName5` IS NULL THEN ''
+		                ELSE CONCAT(' > ' + `category_string`.`catName5`)
+		            END),
+		            (CASE
+		                WHEN `category_string`.`catName6` IS NULL THEN ''
+		                ELSE CONCAT(' > ' + `category_string`.`catName6`)
+		            END),
+		            (CASE
+		                WHEN `category_string`.`catName7` IS NULL THEN ''
+		                ELSE CONCAT(' > ' + `category_string`.`catName7`)
+		            END))
+                ELSE CONCAT((CASE
+                    WHEN `tax`.`level1` IS NULL THEN ''
+                    ELSE `tax`.`level1`
+                END), (CASE
+                    WHEN `tax`.`level2` IS NULL THEN ''
+                    ELSE CONCAT(' > ', `tax`.`level2`)
+                END), (CASE
+                    WHEN `tax`.`level3` IS NULL THEN ''
+                    ELSE CONCAT(' > ', `tax`.`level3`)
+                END), (CASE
+                    WHEN `tax`.`level4` IS NULL THEN ''
+                    ELSE CONCAT(' > ', `tax`.`level4`)
+                END), (CASE
+                    WHEN `tax`.`level5` IS NULL THEN ''
+                    ELSE CONCAT(' > ', `tax`.`level5`)
+                END), (CASE
+                    WHEN `tax`.`level6` IS NULL THEN ''
+                    ELSE CONCAT(' > ', `tax`.`level6`)
+                END), (CASE
+                    WHEN `tax`.`level7` IS NULL THEN ''
+                    ELSE CONCAT(' > ', `tax`.`level7`)
+                END))
+            END) AS `final_category`,
+			CONCAT((CASE
+                WHEN `category_string`.`catName1` IS NULL THEN ''
+                ELSE `category_string`.`catName1`
+            END),
+            (CASE
+                WHEN `category_string`.`catName2` IS NULL THEN ''
+                ELSE CONCAT(' > ' + `category_string`.`catName2`)
+            END),
+            (CASE
+                WHEN `category_string`.`catName3` IS NULL THEN ''
+                ELSE CONCAT(' > ' + `category_string`.`catName3`)
+            END),
+            (CASE
+                WHEN `category_string`.`catName4` IS NULL THEN ''
+                ELSE CONCAT(' > ' + `category_string`.`catName4`)
+            END),
+            (CASE
+                WHEN `category_string`.`catName5` IS NULL THEN ''
+                ELSE CONCAT(' > ' + `category_string`.`catName5`)
+            END),
+            (CASE
+                WHEN `category_string`.`catName6` IS NULL THEN ''
+                ELSE CONCAT(' > ' + `category_string`.`catName6`)
+            END),
+            (CASE
+                WHEN `category_string`.`catName7` IS NULL THEN ''
+                ELSE CONCAT(' > ' + `category_string`.`catName7`)
+            END)) AS `ps_category_string`
+    FROM
+        (SELECT 
+        `crmb1`.`id_category` AS `prd_category1`,
+            `crmb2`.`id_category` AS `prd_category2`,
+            `crmb3`.`id_category` AS `prd_category3`,
+            `crmb4`.`id_category` AS `prd_category4`,
+            `crmb5`.`id_category` AS `prd_category5`,
+            `crmb6`.`id_category` AS `prd_category6`,
+            `crmb7`.`id_category` AS `prd_category7`,
+            `crmb1`.`name` AS `catName1`,
+            `crmb2`.`name` AS `catName2`,
+            `crmb3`.`name` AS `catName3`,
+            `crmb4`.`name` AS `catName4`,
+            `crmb5`.`name` AS `catName5`,
+            `crmb6`.`name` AS `catName6`,
+            `crmb7`.`name` AS `catName7`
+    FROM
+        (SELECT 
+        `nam`.`name` AS `name`,
+            `num`.`id_category` AS `id_category`,
+            `num`.`id_parent` AS `id_parent`
+    FROM
+        `" . $GLOBALS["schema"] . "`.`" . $GLOBALS["tableLead"] . "category` `num`
+    INNER JOIN `" . $GLOBALS["schema"] . "`.`" . $GLOBALS["tableLead"] . "category_lang` `nam` ON `num`.`id_category` = `nam`.`id_category`
+    WHERE
+        `num`.`active` = 1) `crmb1`
+    LEFT JOIN (SELECT 
+        `nam`.`name` AS `name`,
+            `num`.`id_category` AS `id_category`,
+            `num`.`id_parent` AS `id_parent`
+    FROM
+        `" . $GLOBALS["schema"] . "`.`" . $GLOBALS["tableLead"] . "category` `num`
+    INNER JOIN `" . $GLOBALS["schema"] . "`.`" . $GLOBALS["tableLead"] . "category_lang` `nam` ON `num`.`id_category` = `nam`.`id_category`
+    WHERE
+        `num`.`active` = 1) `crmb2` ON `crmb2`.`id_parent` = `crmb1`.`id_category`
+    LEFT JOIN (SELECT 
+        `nam`.`name` AS `name`,
+            `num`.`id_category` AS `id_category`,
+            `num`.`id_parent` AS `id_parent`
+    FROM
+        `" . $GLOBALS["schema"] . "`.`" . $GLOBALS["tableLead"] . "category` `num`
+    INNER JOIN `" . $GLOBALS["schema"] . "`.`" . $GLOBALS["tableLead"] . "category_lang` `nam` ON `num`.`id_category` = `nam`.`id_category`
+    WHERE
+        `num`.`active` = 1) `crmb3` ON `crmb3`.`id_parent` = `crmb2`.`id_category`
+    LEFT JOIN (SELECT 
+        `nam`.`name` AS `name`,
+            `num`.`id_category` AS `id_category`,
+            `num`.`id_parent` AS `id_parent`
+    FROM
+        `" . $GLOBALS["schema"] . "`.`" . $GLOBALS["tableLead"] . "category` `num`
+    INNER JOIN `" . $GLOBALS["schema"] . "`.`" . $GLOBALS["tableLead"] . "category_lang` `nam` ON `num`.`id_category` = `nam`.`id_category`
+    WHERE
+        `num`.`active` = 1) `crmb4` ON `crmb4`.`id_parent` = `crmb3`.`id_category`
+    LEFT JOIN (SELECT 
+        `nam`.`name` AS `name`,
+            `num`.`id_category` AS `id_category`,
+            `num`.`id_parent` AS `id_parent`
+    FROM
+        `" . $GLOBALS["schema"] . "`.`" . $GLOBALS["tableLead"] . "category` `num`
+    INNER JOIN `" . $GLOBALS["schema"] . "`.`" . $GLOBALS["tableLead"] . "category_lang` `nam` ON `num`.`id_category` = `nam`.`id_category`
+    WHERE
+        `num`.`active` = 1) `crmb5` ON `crmb5`.`id_parent` = `crmb4`.`id_category`
+    LEFT JOIN (SELECT 
+        `nam`.`name` AS `name`,
+            `num`.`id_category` AS `id_category`,
+            `num`.`id_parent` AS `id_parent`
+    FROM
+        `" . $GLOBALS["schema"] . "`.`" . $GLOBALS["tableLead"] . "category` `num`
+    INNER JOIN `" . $GLOBALS["schema"] . "`.`" . $GLOBALS["tableLead"] . "category_lang` `nam` ON `num`.`id_category` = `nam`.`id_category`
+    WHERE
+        `num`.`active` = 1) `crmb6` ON `crmb6`.`id_parent` = `crmb5`.`id_category`
+    LEFT JOIN (SELECT 
+        `nam`.`name` AS `name`,
+            `num`.`id_category` AS `id_category`,
+            `num`.`id_parent` AS `id_parent`
+    FROM
+        `" . $GLOBALS["schema"] . "`.`" . $GLOBALS["tableLead"] . "category` `num`
+    INNER JOIN `" . $GLOBALS["schema"] . "`.`" . $GLOBALS["tableLead"] . "category_lang` `nam` ON `num`.`id_category` = `nam`.`id_category`
+    WHERE
+        `num`.`active` = 1) `crmb7` ON `crmb7`.`id_parent` = `crmb6`.`id_category`
+    WHERE
+        `crmb1`.`id_category` NOT IN (1 , 2)) `category_string`
+    LEFT JOIN `" . $GLOBALS["schema"] . "`.`mc_cattax_mapping` AS `taxmap` ON `taxmap`.`cattax_merchant_id` = '" . $GLOBALS["merchantID"] . "' AND CONCAT((CASE
+        WHEN `category_string`.`catName1` IS NULL THEN ''
+        ELSE `category_string`.`catName1`
+    END), (CASE
+        WHEN `category_string`.`catName2` IS NULL THEN ''
+        ELSE CONCAT(' > ' + `category_string`.`catName2`)
+    END), (CASE
+        WHEN `category_string`.`catName3` IS NULL THEN ''
+        ELSE CONCAT(' > ' + `category_string`.`catName3`)
+    END), (CASE
+        WHEN `category_string`.`catName4` IS NULL THEN ''
+        ELSE CONCAT(' > ' + `category_string`.`catName4`)
+    END), (CASE
+        WHEN `category_string`.`catName5` IS NULL THEN ''
+        ELSE CONCAT(' > ' + `category_string`.`catName5`)
+    END), (CASE
+        WHEN `category_string`.`catName6` IS NULL THEN ''
+        ELSE CONCAT(' > ' + `category_string`.`catName6`)
+    END), (CASE
+        WHEN `category_string`.`catName7` IS NULL THEN ''
+        ELSE CONCAT(' > ' + `category_string`.`catName7`)
+    END)) = `taxmap`.`category_string`
+    LEFT JOIN `" . $GLOBALS["schema"] . "`.`mc_taxonomy` AS `tax` ON `tax`.`id` = `taxmap`.`cattax_id`
+    LEFT JOIN `" . $GLOBALS["schema"] . "`.`" . $GLOBALS["tableLead"] . "category_product` `prd` ON `prd`.`id_category` = coalesce(`category_string`.`prd_category7`, `category_string`.`prd_category6`, `category_string`.`prd_category5`, `category_string`.`prd_category4`, `category_string`.`prd_category3`, `category_string`.`prd_category2`, `category_string`.`prd_category1`)) AS `a5` ON `a5`.`id_product` = `a1`.`id_product` ";
 }
 
 //create query portion - "where"
@@ -319,14 +434,6 @@ function MerchPrint($file,$sql){
 	}
 };
 
-//REMOVE THIS BEFORE DEPLOYMENT
-function querytester(){
-
-	$query =  "SELECT " . reportQuerySelect() . reportQueryFrom() . reportQueryWhere();
-	
-	return $query;
-};
-
 ////////////////////////////////////////////////////////////////////////
 //Merchant Specific Functions  - Custom Functions
 ////////////////////////////////////////////////////////////////////////
@@ -351,7 +458,7 @@ function customFunction($value,$alias){
 		elseif($value == "ShippingCost"){return priceGrabberShippingCost($alias);}
 	}
 }
-
+//checks for valid UPCs and those whos leading zeros may have been truncated up to two spaces
 function upcFix($alias){
 	return "(case
             when (length(`a1`.`upc`) = 12) then `a1`.`upc`
@@ -359,107 +466,35 @@ function upcFix($alias){
             when (length(`a1`.`upc`) = 10) then concat('00', `a1`.`upc`)
         end) AS `" . $alias . "`";
 }
-
+//creates a link to the primary image (full size)
 function imageLink($alias){
 	return "concat('http://" . $_SERVER["SERVER_NAME"] . "/', `a1`.`id_product`,'-large_default/',replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(`a3`.`name`, '-', ''), '#', ''), '$', ''), '%', ''), '&', ''), '(', ''), ')', ''), '*', ''), ',', ''), '.', ''), '/', ''), ':', ''), ';', ''), '?', ''), '@', ''), '[', ''), ']', ''), '_', ''), '`', ''), '{', ''), '|', ''), '}', ''), '~', ''), '‘', ''), '‹', ''), '›', ''), '‾', ''), '+', ''), '<', ''), '=', ''), '>', ''), '↑', ''), '†', ''), '‡', ''), '‰', ''), '™', ''), '" . chr(92) .  "'', ''), '\"', ''), ' ', '-'), '---', '-'), '--', '-'), '.jpg') AS `" . $alias . "`";
 }
-
+//creates a link to the product page
 function productLink($alias){
 	return "concat('http://" . $_SERVER["SERVER_NAME"] . "/', `a4`.`link_rewrite`, '/', `a1`.`id_product`, '-', replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(`a3`.`name`, '-', ''), '#', ''), '$', ''), '%', ''), '&', ''), '(', ''), ')', ''), '*', ''), ',', ''), '.', ''), '/', ''), ':', ''), ';', ''), '?', ''), '@', ''), '[', ''), ']', ''), '_', ''), '`', ''), '{', ''), '|', ''), '}', ''), '~', ''), '‘', ''), '‹', ''), '›', ''), '‾', ''), '+', ''), '<', ''), '=', ''), '>', ''), '↑', ''), '†', ''), '‡', ''), '‰', ''), '™', ''), '" . chr(92) .  "'', ''), '\"', ''), ' ', '-'), '---', '-'), '--', '-'), '.html') AS `" . $alias . "`";
 }
-
+//select product category or taxonomy if defined
 function productCategory($alias){
-	return "(case
-		when 
-			isnull(`a5`.`catName1`) 
-		then NULL
-		when 
-			((`a5`.`catName1` is not null) 
-				AND isnull(`a5`.`catName2`) 
-				AND isnull(`a5`.`catName3`) 
-				AND isnull(`a5`.`catName4`) 
-				AND isnull(`a5`.`catName5`) 
-				AND isnull(`a5`.`catName6`)
-				AND isnull(`a5`.`catName7`))
-		then `a5`.`catName1`
-		when 
-			((`a5`.`catName1` is not null AND `a5`.`catName2` is not null)
-				AND isnull(`a5`.`catName3`) 
-				AND isnull(`a5`.`catName4`) 
-				AND isnull(`a5`.`catName5`) 
-				AND isnull(`a5`.`catName6`)
-				AND isnull(`a5`.`catName7`))
-		then concat(`a5`.`catName1`, 
-					' > ',
-					`a5`.`catName2`)
-		when
-			((`a5`.`catName1` is not null AND `a5`.`catName2` is not null AND `a5`.`catName3` is not null)
-				AND isnull(`a5`.`catName4`) 
-				AND isnull(`a5`.`catName5`) 
-				AND isnull(`a5`.`catName6`)
-				AND isnull(`a5`.`catName7`))
-		then concat(`a5`.`catName1`,
-					' > ',
-					`a5`.`catName2`,
-					' > ',
-					`a5`.`catName3`)
-		when
-			((`a5`.`catName1` is not null AND `a5`.`catName2` is not null AND `a5`.`catName3` is not null AND `a5`.`catName4` is not null) 
-				AND isnull(`a5`.`catName5`) 
-				AND isnull(`a5`.`catName6`)
-				AND isnull(`a5`.`catName7`))
-		then concat(`a5`.`catName1`,
-					' > ',
-					`a5`.`catName2`,
-					' > ',
-					`a5`.`catName3`,
-					' > ',
-					`a5`.`catName4`)
-		when
-			((`a5`.`catName1` is not null AND `a5`.`catName2` is not null AND `a5`.`catName3` is not null AND `a5`.`catName4` is not null AND `a5`.`catName5` is not null)  
-				AND isnull(`a5`.`catName6`)
-				AND isnull(`a5`.`catName7`))
-		then concat(`a5`.`catName1`,
-					' > ',
-					`a5`.`catName2`,
-					' > ',
-					`a5`.`catName3`,
-					' > ',
-					`a5`.`catName4`,
-					' > ',
-					`a5`.`catName5`)
-		when
-			((`a5`.`catName1` is not null AND `a5`.`catName2` is not null AND `a5`.`catName3` is not null AND `a5`.`catName4` is not null AND `a5`.`catName5` is not null AND `a5`.`catName6` is not null)
-				AND isnull(`a5`.`catName7`))
-		then concat(`a5`.`catName1`,
-					' > ',
-					`a5`.`catName2`,
-					' > ',
-					`a5`.`catName3`,
-					' > ',
-					`a5`.`catName4`,
-					' > ',
-					`a5`.`catName5`,
-					' > ',
-					`a5`.`catName6`)
-		when
-			(`a5`.`catName1` is not null AND `a5`.`catName2` is not null AND `a5`.`catName3` is not null AND `a5`.`catName4` is not null AND `a5`.`catName5` is not null AND `a5`.`catName6` is not null AND `a5`.`catName7` is not null)
-		then concat(`a5`.`catName1`,
-					' > ',
-					`a5`.`catName2`,
-					' > ',
-					`a5`.`catName3`,
-					' > ',
-					`a5`.`catName4`,
-					' > ',
-					`a5`.`catName5`,
-					' > ',
-					`a5`.`catName6`,
-					' > ',
-					`a5`.`catName7`)		
-		else NULL
-	end) AS `" . $alias . "`";
+	return " `a5`.`ps_category_string` AS `" . $alias . "` ";
 }
+////////////////////////////////////////////////////////////////////////
+//Bug Reporting Functions
+////////////////////////////////////////////////////////////////////////
 
+//checks to see if a bug has occured and displays a report module
+function bugModal(){
+	return "
+	<div id=\"bugDiv\">
+		<a href=\"#openModal\">Click Here to Report a Bug</a>
+		<div id=\"openModal\" class=\"modalDialog\">
+			<div>
+				<a href=\"#close\" title=\"Close\" class=\"close\">X</a>
+				<h2>Report a Bug</h2>
+				<p>Form will be here that requests a description of the error and submits to <a target=\"_blank\" title=\"View Contact Function Page\" href=\"functions/contact.php\">contact function page</a></p>
+			</div>
+		</div>
+	</div>";
+}
 
 ?>

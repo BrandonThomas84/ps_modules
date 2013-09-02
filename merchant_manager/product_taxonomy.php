@@ -1,4 +1,8 @@
-<?php sec_session_start(); if(login_check($mysqli) == true) { ?>
+<?php 
+//check for secure session 
+sec_session_start(); 
+if(login_check($mysqli) == true) { 
+?>
 	<h1><?php echo $GLOBALS["merchant"]; ?> Taxonomy Configuration</h1>
 	<?php
 
@@ -17,14 +21,14 @@
 	<table>
 		<thead>
 			<tr>
-				<td>
+				<td colspan="2">
 					<h2><?php echo $_POST["category"]; ?> Taxonomy Correlation (id: [<?php echo mapID($category); ?>])</h2>
 				</td>
 			</tr>
 		</thead>
 		<tbody>
 			<tr>
-				<td>
+				<td colspan="2">
 					<form action="<?php echo $_SERVER["PHP_SELF"] . "?f=" . $_GET["f"] . "&p=" . $_GET["p"]; ?>" method="POST" name="categorySelect"> 
 						<input type="hidden" name="category" value="<?php echo $_POST["category"]; ?>"><br/>
 						<?php echo displayTaxOptionList(1,categoryToTaxCheck($category)); ?>
@@ -39,7 +43,10 @@
 			</tr>
 			<tr>
 				<td>
-					<a href="<?php echo $_SERVER["PHP_SELF"] . "?f=" . $_GET["f"] . "&p=" . $_GET["p"]; ?>" title="go back">Back</a>
+					<a href="<?php echo $_SERVER["PHP_SELF"] . "?f=" . $_GET["f"] . "&p=" . $_GET["p"]; ?>" title="go back">Back to Category Select</a>
+				</td>
+				<td>
+					<a href="<?php echo $_SERVER["PHP_SELF"] . "?f=" . $_GET["f"]; ?>" title="go back">Back to <?php echo $GLOBALS["merchant"]; ?> Control Panel</a>
 				</td>
 			</tr>
 		</tbody>
@@ -62,7 +69,21 @@
 					</form>
 				</td>
 			</tr>
+			<tr>
+				<td>
+					<a href="<?php echo $_SERVER["PHP_SELF"] . "?f=" . $_GET["f"]; ?>" title="go back">Back to <?php echo $GLOBALS["merchant"]; ?> Control Panel</a>
+				</td>
+			</tr>
+		</tbody>
+	</table>
+	<hr>
+	<table style="width: 95%;">
+		<thead>
+			<td colspan="2">Categories to Taxonomy Status</td>
+		</thead>
+		<tbody>
+			<tr><td><?php echo categoriesMissingTaxonomy(); ?></td></tr>
 		</tbody>
 	</table>
 	<?php } ?>
-<?php }  //closes secure session check ?>
+<?php }  //end secure session check ?>

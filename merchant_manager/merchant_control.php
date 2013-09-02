@@ -1,6 +1,5 @@
-<?php sec_session_start(); if(login_check($mysqli) == true) { ?>
-
-<?php
+<?php //check for secure session 
+	sec_session_start(); if(login_check($mysqli) == true) { 
 
 require("feed_config/config_functions.php");
 
@@ -24,8 +23,8 @@ if(isset($_GET["fieldID"])){
 		
 		echo "
 			<div class=\"clear\" style=\"height: 30px !important;\"></div>
-			<a class=\"button\" href=\"functions/merchant_create.php?f=" . $GLOBALS["merch"] . "\" title=\"Create New File\">Create New " . $GLOBALS["merchant"] . " Merchant File</a>
-			<a class=\"button\" href=\"functions/merchant_create.php?f=" . $GLOBALS["merch"] . "&del=true\" title=\"\">Purge Current File</a>
+			<a class=\"button\" href=\"functions/feed_create.php?f=" . $GLOBALS["merch"] . "\" title=\"Create New File\">Create New " . $GLOBALS["merchant"] . " Merchant File</a>
+			<a class=\"button\" href=\"functions/feed_create.php?f=" . $GLOBALS["merch"] . "&del=true\" title=\"\">Purge Current File</a>
 			<a class=\"button\" href=\"submissions/AHS_" . $GLOBALS["merchantID"] . "_product_submission.txt\" target=\"_blank\" title=\"Download Merchant File - CURRENT SIZE: " . $fileSize . " MB\">Download " . $GLOBALS["merchant"] ." Merchant File</a>
 			<a class=\"button\" href=\"" . $_SERVER["PHP_SELF"] . "?f=" . $GLOBALS["merch"] . "&p=exmng\" title=\"Manage Exclusions\">Manage " . $GLOBALS["merchant"] ." Exclusions</a>". taxonomyButton() . "
 			<br/>
@@ -46,7 +45,7 @@ if(isset($_GET["fieldID"])){
 		echo "
 	<p style=\"font-weight:bold; color: red; font-size:18px;\">We were unable to locate your file, please start by creating a new file below</p>
 	<div class=\"clear\" style=\"height: 30px !important;\"></div>
-	<a href=\"functions/merchant_create.php?f=" . $_GET["f"] . "\" class=\"button\" title=\"Create New File\">Create New " . $GLOBALS["merchant"] . " Merchant File</a>"; 
+	<a href=\"functions/feed_create.php?f=" . $_GET["f"] . "\" class=\"button\" title=\"Create New File\">Create New " . $GLOBALS["merchant"] . " Merchant File</a>"; 
 	}
 }
 ?>

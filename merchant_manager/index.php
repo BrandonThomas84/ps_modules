@@ -1,33 +1,31 @@
 <!doctype html>
 <html><head>
-<meta charset="utf-8">
+
 <title>Merchant Center Manager</title>
+<meta charset="utf-8">
 <meta name="description" content="Merchant Manager - Easily create feeds for the webs top shopping engines" />
 <meta name="author" content="Brandon Thomas">
 <meta name="robots" content="noindex,nofollow" />
+
 <!--STYLESHEETS-->
 <link href="style/style.css" rel="stylesheet" type="text/css" media="screen">
 <link href="feed_config/style/config_style.css" rel="stylesheet" type="text/css" media="screen">
-<!--START Google web fonts -->
-<link href='http://fonts.googleapis.com/css?family=Armata' rel='stylesheet' type='text/css'>
-<!--END Google web fonts -->
+
 <!--START JQuery -->
+<!-- COMMENTED OUT TO DECREASE PAGE LOAD TIME UNTIL NEEDED
 <link rel="stylesheet" href="http://code.jquery.com/ui/1.10.3/themes/smoothness/jquery-ui.css" />
 <script type="text/javascript" src="http://code.jquery.com/jquery-1.9.1.js"></script>
 <script type="text/javascript" src="http://code.jquery.com/ui/1.10.3/jquery-ui.js"></script>
-<!--END JQuery JS -->
+-->
+
 </head>
 <body>
 <div id="primary">
 
-<?php 
-require('functions/functions.php');
-sec_session_start();
-if(login_check($mysqli) == true) {
-
+<?php require_once('functions/functions.php'); ?>
+<?php //check for secure session 
+	sec_session_start(); if(login_check($mysqli) == true) { 
 ?>
-<!--Login: http://www.wikihow.com/Create-a-Secure-Login-Script-in-PHP-and-MySQL-->
-
   <div id="nav">
     <a href="./" title="home"><p>Merchant Manager</p></a>
     <p style="margin: 3px 10px 5px 10px;font-size: 13px;">Select from your installed modules</p>
@@ -65,15 +63,15 @@ if(login_check($mysqli) == true) {
 	}
 ?>
   </div>
-
-
-<?php } else { ?>
+<?php 
+} else { 
+?>
 <!--START js Login-->
 <script type="text/javascript" src="functions/login/sha512.js"></script>
 <script type="text/javascript" src="functions/login/forms.js"></script>
 <!--END js Login-->
 <?php require('functions/login/login.php');}?>
-
 </div>
+<?php echo bugModal(); ?>
 </body>
 </html>

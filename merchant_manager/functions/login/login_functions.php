@@ -42,6 +42,8 @@ function login($email, $password, $mysqli) {
                $_SESSION['username'] = $username;
 
                $_SESSION['login_string'] = hash('sha512', $password.$user_browser);
+               $_SESSION['email'] = $email;
+
                // Login successful.
                return true;    
          } else {
