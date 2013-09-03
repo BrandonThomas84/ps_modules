@@ -68,7 +68,7 @@ if(login_check($mysqli) == true) {
 	//send bug submission email
 	if(isset($_POST["bugSubmit"])){ 
 		bugSubmit("");
-		header("Location: ../index.php?msg=sc0005");
+		header("Location: " . returnURL() . "?msg=sc0005");
 	}
 	
 	//testing purposes - uncomment to view what function output is

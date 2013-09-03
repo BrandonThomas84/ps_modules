@@ -121,15 +121,19 @@ a.button:hover {
 .errMod {
 	border: 2px solid red;
 	background: darkred;
+	color: red !important;
 }
 .sucMod {
 	border: 2px solid lightgreen;
 	background: darkgreen;
+	color: lightgreen !important;
 }
-.errMod p, .sucMod p {
-	color: white !important;
+.warMod {
+	border: 2px solid #CDC673;
+	background: #FFFF00;
+	color: #8B8970 !important;
 }
-.errMod, .sucMod {
+.errMod, .sucMod, .warMod {
 	width: 100%;
 	margin: 10px 0 10px 0;
 	text-align: center;

@@ -8,12 +8,16 @@ if(!$file){die("Cannot open " . $GLOBALS["merchant"] . " Merchant File!");}
 
 if(isset($_GET["del"])){
 	unlink($file);
+	//close open file permissions and redirect back with message
+	fclose($file);
+	header("Location: " . returnURL() . "&msg=war0001");
 	} else {
 		HeaderPrint($file,queryBuilder('head'));
 		MerchPrint($file,queryBuilder(''));
+		//close open file permissions and redirect back with message
 		fclose($file);
+		header("Location: " . returnURL() . "&msg=sc0002");
 	}
 
-//close open file permissions
-header("Location: " . $returnURL . "&msg=sc0002");
+
 ?> 

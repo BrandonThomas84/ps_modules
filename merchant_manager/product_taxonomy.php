@@ -8,7 +8,10 @@ if(login_check($mysqli) == true) {
 
 		if(isset($_POST["category"])){ 
 		$category = $_POST["category"];
-		
+
+			if(isset($_POST["apptax"])){
+				setTaxonomyValue(getCattaxID($_POST["taxShortcut"]),mapID($category));
+			}
 			if(isset($_POST["levelSubmit"])){
 				assignNewTaxonomy($_POST["levelval"],mapID($category));
 			}
@@ -51,6 +54,13 @@ if(login_check($mysqli) == true) {
 			</tr>
 		</tbody>
 	</table>
+	<form action="<?php echo $_SERVER["PHP_SELF"]; ?>?f=<?php echo $_GET["f"]; ?>&p=<?php echo $_GET["p"]; ?>" method="POST" name="taxonomySearch"> 
+		<label for="search">Quick Apply - Search for Taxonomy Values</label>
+		<input type="text" width="25" name="search">
+		<input type="hidden" name="category" value="<?php echo $category; ?>">
+		<input type="submit" value="Search"/>
+	</form>
+	<?php if(isset($_POST["search"])){echo taxonomySearch($_POST["search"],$category);}?>
 	<?php } else { ?>
 	<table>
 		<thead>
@@ -85,5 +95,7 @@ if(login_check($mysqli) == true) {
 			<tr><td><?php echo categoriesMissingTaxonomy(); ?></td></tr>
 		</tbody>
 	</table>
-	<?php } ?>
-<?php }  //end secure session check ?>
+<?php 
+	} 
+}  //end secure session check 
+?>

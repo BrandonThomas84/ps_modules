@@ -26,7 +26,6 @@ function merchantFriendly($m){
 		elseif($m == "gpf"){return "Google";}
 		elseif($m == "pgpf"){return "PriceGrabber";}
 }
-
 //defining merchant variables after function is created
 if(isset($_GET["f"])){
 	$merch = $_GET["f"];
@@ -40,13 +39,56 @@ if(isset($_GET["f"])){
 		require($GLOBALS["root"] . "/merchant_manager/merchants/" . $GLOBALS["merchantID"] . "/" . $GLOBALS["merchantID"] . "_functions.php");
 	}
 }
-
+//applies 'selected' to optionlists where value matches
 function feedConfigSelected($needle,$haystack){
 	if($needle === "NULL" || $needle === "N/A" || $needle == ""){return "";
 	} elseif($needle == $haystack){return " selected ";
 		}
 }
+//strips all messages from the URL provided and returns new clean URL
+function removeMessages($url){
+    //removing all but the core URL
+    $a = array(strtok($url,"?"));
 
+    //checking if submitted URL contains variable information
+    if(substr($url,strpos($url,"?")) == $url){
+        $vars = "";
+        $p = "";
+    } else {
+        //strips leading '?' and page location from url
+        $vars = str_replace("?","",substr($url,strpos($url,"?")));
+        $p = explode("&",$vars);
+    }
+
+    //search and extract p & f values
+    for($i=0;$i<=substr_count($vars,"&");$i++){
+        
+        //finds f GET and returns it as fVal
+        if(strstr($p[$i],"f=")){
+            $fVal = "?" . $p[$i];
+        } else {$fVal = "";}
+        array_push($a,$fVal);
+
+        //finds p GET and returns it as pVal
+        if(strstr($p[$i],"p=")){
+            if(isset($fVal)){$pVal = "&" . $p[$i];} else {$pVal = "?" . $p[$i];}
+        } else {$pVal = "";}
+        array_push($a,$pVal);
+    }
+
+    //returns URL without anything but the f value and p value if set
+    return implode($a,""); 
+}
+//creates stripped return URL value, sending to home page if the referer value is not set
+function returnURL(){
+    if(isset($_SERVER["HTTP_REFERER"])){
+        $returnURL = removeMessages($_SERVER["HTTP_REFERER"]);
+    } else {
+        $returnURL = $GLOBALS["root"];
+    }
+    return $returnURL;
+}
+//creates navigation menu
 function navGeneration(){
 	$sql = "SELECT DISTINCT `merchant_id` FROM `" . $GLOBALS["schema"] . "`.`merchant_center_select_config` ORDER BY `merchant_id`";
 	
@@ -123,7 +165,10 @@ function messageReporting(){
 											} elseif($msg == "sc0005"){
 												$d = "sucMod";
 												$m = "<p>Error successfully reported.</p><p>Thank you for your participation.</p>";
-												} 
+												} elseif($msg == "war0001"){
+                                                    $d = "warMod";
+                                                    $m = "<p>File has been emptied.</p>";
+                                                    }
 				return "
 		<div class=\"$d\">
 			$m
@@ -147,7 +192,7 @@ function reportQuerySelect(){
 		if(isset($row["static_value"]) && $row["static_value"] != ""){
 			array_push($statement,"'" . $row["static_value"] . "' AS `" . $row["report_field_name"] . "`");
 			} elseif (isset($row["custom_function"])){
-				array_push($statement,customFunction($row["custom_function"],$row["merchant_id"],$row["report_field_name"]));
+				array_push($statement,customFunction($row["custom_function"],$row["report_field_name"]));
 				} else {
 					array_push($statement, "`" . $row["table_name"] . "`.`" . $row["database_field_name"] . "` AS `" . $row["report_field_name"] . "`");
 					}
@@ -388,12 +433,12 @@ function reportQueryFrom(){
         ELSE CONCAT(' > ' + `category_string`.`catName7`)
     END)) = `taxmap`.`category_string`
     LEFT JOIN `" . $GLOBALS["schema"] . "`.`mc_taxonomy` AS `tax` ON `tax`.`id` = `taxmap`.`cattax_id`
-    LEFT JOIN `" . $GLOBALS["schema"] . "`.`" . $GLOBALS["tableLead"] . "category_product` `prd` ON `prd`.`id_category` = coalesce(`category_string`.`prd_category7`, `category_string`.`prd_category6`, `category_string`.`prd_category5`, `category_string`.`prd_category4`, `category_string`.`prd_category3`, `category_string`.`prd_category2`, `category_string`.`prd_category1`)) AS `a5` ON `a5`.`id_product` = `a1`.`id_product` ";
+    LEFT JOIN `" . $GLOBALS["schema"] . "`.`" . $GLOBALS["tableLead"] . "category_product` `prd` ON `prd`.`id_category` = coalesce(`category_string`.`prd_category7`, `category_string`.`prd_category6`, `category_string`.`prd_category5`, `category_string`.`prd_category4`, `category_string`.`prd_category3`, `category_string`.`prd_category2`, `category_string`.`prd_category1`) ORDER BY `final_category`) AS `a5` ON `a5`.`id_product` = `a1`.`id_product` ";
 }
 
 //create query portion - "where"
 function reportQueryWhere(){
-	return " WHERE (`a1`.`active` = 1) AND (`a1`.`available_for_order` = 1) AND (`a1`.`id_product` NOT IN (SELECT id_product FROM `" . $GLOBALS["schema"] . "`.`merchant_exclusion` WHERE `exclusion` = '" . $GLOBALS["merchantID"] . "'))";
+	return " WHERE (`a1`.`active` = 1) AND (`a1`.`available_for_order` = 1) AND (`a1`.`id_product` NOT IN (SELECT `id_product` FROM `" . $GLOBALS["schema"] . "`.`merchant_exclusion` WHERE `exclusion` = '" . $GLOBALS["merchantID"] . "'))";
 }
 
 ////////////////////////////////////////////////////////////////////////
@@ -403,14 +448,22 @@ function reportQueryWhere(){
 //constructs the query from the three segements above
 function queryBuilder($v){
 
-	$query =  "SELECT " . reportQuerySelect() . reportQueryFrom() . reportQueryWhere();
+	$query =  "SELECT DISTINCT " . reportQuerySelect() . reportQueryFrom() . reportQueryWhere();
 	
 	$headerlimit = " LIMIT 0,1 ";
 
 	if($v == 'head'){return mysql_query($query . $headerlimit);} 
 		else {return mysql_query($query);} 
 };
+//rpints the query being used for testing purposes
+function printQueryBuilder($v){
+    $query =  "SELECT DISTINCT " . reportQuerySelect() . reportQueryFrom() . reportQueryWhere();
+    
+    $headerlimit = " LIMIT 0,1 ";
 
+    if($v == 'head'){return $query . $headerlimit;} 
+        else {return $query;}
+}
 //function used to construct the header of the output file
 function HeaderPrint($file,$sql){
 	
@@ -476,7 +529,10 @@ function productLink($alias){
 }
 //select product category or taxonomy if defined
 function productCategory($alias){
-	return " `a5`.`ps_category_string` AS `" . $alias . "` ";
+	return " `a5`.`final_category` AS `" . $alias . "` ";
+}
+function productCategoryOrig($alias){
+    return " `a5`.`ps_category_string` AS `" . $alias . "` ";
 }
 ////////////////////////////////////////////////////////////////////////
 //Bug Reporting Functions

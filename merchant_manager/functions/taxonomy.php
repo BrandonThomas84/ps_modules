@@ -10,7 +10,7 @@ function taxonomyButton(){
 
 //creates an option list containing all the categories that are currently configured in the prestashop database (up to 7 levels)
 function distinctProductCategoryOptionList(){
-	$sql = "SELECT DISTINCT " . productCategory("product_type") .  reportQueryFrom() . reportQueryWhere();
+	$sql = "SELECT DISTINCT " . productCategoryOrig("product_type") .  reportQueryFrom() . reportQueryWhere() . " ORDER BY `product_type`";
 	$query = mysql_query($sql);
 	
 	echo "<select name=\"category\">";
@@ -18,27 +18,6 @@ function distinctProductCategoryOptionList(){
 		echo "<option value=\"" . $row["product_type"] . "\">" . $row["product_type"] . "</option>";
 	}
 	echo "</select>";
-}
-
-//check to see if there is already a mapped value for this category if not it will insert the value into the database table if there is it returns the taxonomy id that is being used
-function categoryToTaxCheck($category){
-	$sql = "SELECT * FROM `" . $GLOBALS["schema"] . "`.`mc_cattax_mapping` WHERE `cattax_merchant_id` = '" . $GLOBALS["merchantID"] . "' AND `category_string` =  '" . $category . "';";
-	$query = mysql_query($sql);
-	$numRows = mysql_num_rows($query);
-	$row = mysql_fetch_array($query);
-	
-	if($numRows == 0){
-		$insert = "INSERT INTO `" . $GLOBALS["schema"] . "`.`mc_cattax_mapping` (`category_string`,`cattax_merchant_id`) VALUES ('$category','" . $GLOBALS["merchantID"] . "');";
-		$query2 = mysql_query($insert);
-
-		return 0;
-	} else {
-		if(is_null($row["cattax_id"])){ 
-			return 0;
-		} else {
-			return $row["cattax_id"];
-		}
-	}
 }
 //returns the row id for updating mc_cattax_mapping table
 function mapID($category){
@@ -106,7 +85,35 @@ function displayTaxOptionList($level,$id){
 		}
 	}
 }
+//returns categories without taxonomy
+function categoriesMissingTaxonomy(){
+	$subquery = "SELECT DISTINCT " . productCategoryOrig("product_type") .  reportQueryFrom() . reportQueryWhere();
+	
+	$sql = "SELECT DISTINCT (CASE WHEN `map`.`category_string` IS NULL THEN `test`.`product_type` ELSE `map`.`category_string` END) AS `missing_categories`
+	FROM `" . $GLOBALS["schema"] . "`.`mc_cattax_mapping` AS `map`
+	LEFT JOIN (" . $subquery . ") AS `test`
+		ON `test`.`product_type` = `map`.`category_string` 
+	WHERE `map`.`cattax_id` IS NULL OR `test`.`product_type` IS NULL
 
+	UNION
+
+	SELECT DISTINCT (CASE WHEN `map`.`category_string` IS NULL THEN `test`.`product_type` ELSE `map`.`category_string` END) AS `missing_categories`
+	FROM `" . $GLOBALS["schema"] . "`.`mc_cattax_mapping` AS `map`
+	RIGHT JOIN (" . $subquery . ") AS `test`
+		ON `test`.`product_type` = `map`.`category_string` 
+	WHERE `map`.`cattax_id` IS NULL OR `test`.`product_type` IS NULL
+	ORDER BY `missing_categories`;";
+	$query = mysql_query($sql);
+	$numrow = mysql_num_rows($query);
+
+	if($numrow == 0){
+		echo "<li><p>All of your categories have matching taxonomy for this merchant</p></li>";
+	} else {
+		while($row = mysql_fetch_array($query)){
+			echo "<li><p><strong>" . $row["missing_categories"] . "</strong> is missing taxonomy</p></li>";
+		}
+	}
+}
 //return a single string value of all the taxonomy levels that are currently assigned to the category
 function currentTaxonomyString($maxLevel){
 	//start counter
@@ -138,20 +145,19 @@ function assignNewTaxonomy($newValue,$mapID){
 	$row = mysql_fetch_array($query);
 	
 	$string = currentTaxonomyString(7) . $row["newValue"];
+	
 	$stringSQL = "SELECT `id` FROM `" . $GLOBALS["schema"] . "`.`mc_taxonomy` WHERE replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(CONCAT(COALESCE(`level1`, ''),COALESCE(`level2`, ''),COALESCE(`level3`, ''),COALESCE(`level4`, ''),COALESCE(`level5`, ''),COALESCE(`level6`, ''),COALESCE(`level7`, '')), '-', ''), '#', ''), '$', ''), '%', ''), '&', ''), '(', ''), ')', ''), '*', ''), ',', ''), '.', ''), '/', ''), ':', ''), ';', ''), '?', ''), '@', ''), '[', ''), ']', ''), '_', ''), '`', ''), '{', ''), '|', ''), '}', ''), '~', ''), '‘', ''), '‹', ''), '›', ''), '+', ''), '<', ''), '=', ''), '>', ''), '\'', ''), '\"', ''), ' ', ''), '---', ''), '--', '') = '" . $string . "';";
 	$stringQUERY = mysql_query($stringSQL);
-	
-
-	//check for matching value to avoid taxonomy errors
+		
+	//apply new value
 	while($stringROW = mysql_fetch_array($stringQUERY)){
+		//check for matching value to avoid taxonomy errors	
 		if(mysql_num_rows($stringQUERY) == 1){
-			$sql = "UPDATE `" . $GLOBALS["schema"] . "`.`mc_cattax_mapping` SET cattax_id = '" . $stringROW["id"] . "' WHERE `id` = '" . $mapID ."';";
-			$query = mysql_query($sql);
-			echo "<div class=\"sucMod\"><p>Success! You have added a new taxonomy value!</p></div><br>";
-		} else {
-			echo "<div class=\"errMod\"><p>Sorry, you selected an improper taxonomy value, please try again<p></div><br>" . $stringSQL;
-		}
+			setTaxonomyValue($stringROW["id"],$mapID);
+		} 
 	}
+	
+	echo "<div class=\"sucMod\"><p>Success! You have added a new taxonomy value!</p></div><br>";
 }
 //removes level (and all subsequent levels) of a taxonomy
 function updateTaxonomy($removeValue,$mapID,$maxLevel){
@@ -173,38 +179,78 @@ function updateTaxonomy($removeValue,$mapID,$maxLevel){
 		while($stringROW = mysql_fetch_array($stringQUERY)){
 			//check for matching value to avoid taxonomy errors	
 			if(mysql_num_rows($stringQUERY) == 1){
-				$sql = "UPDATE `" . $GLOBALS["schema"] . "`.`mc_cattax_mapping` SET cattax_id = '" . $stringROW["id"] . "' WHERE `id` = '" . $mapID ."';";
-				$query = mysql_query($sql);
+				setTaxonomyValue($stringROW["id"],$mapID);
 			} 
 		}
 	}
 }
-//returns categories without taxonomy
-function categoriesMissingTaxonomy(){
-	$subquery = "SELECT DISTINCT " . productCategory("product_type") .  reportQueryFrom() . reportQueryWhere();
-	
-	$sql = "SELECT DISTINCT (CASE WHEN `map`.`category_string` IS NULL THEN `test`.`product_type` ELSE `map`.`category_string` END) AS `missing_categories`
-	FROM `" . $GLOBALS["schema"] . "`.`mc_cattax_mapping` AS `map`
-	LEFT JOIN (" . $subquery . ") AS `test`
-		ON `test`.`product_type` = `map`.`category_string` 
-	WHERE `map`.`cattax_id` IS NULL OR `test`.`product_type` IS NULL
-
-	UNION
-
-	SELECT DISTINCT (CASE WHEN `map`.`category_string` IS NULL THEN `test`.`product_type` ELSE `map`.`category_string` END) AS `missing_categories`
-	FROM `" . $GLOBALS["schema"] . "`.`mc_cattax_mapping` AS `map`
-	RIGHT JOIN (" . $subquery . ") AS `test`
-		ON `test`.`product_type` = `map`.`category_string` 
-	WHERE `map`.`cattax_id` IS NULL OR `test`.`product_type` IS NULL;";
+//updates the taxonomy mapping table
+function setTaxonomyValue($cattaxID,$mapID){
+	$sql = "UPDATE `" . $GLOBALS["schema"] . "`.`mc_cattax_mapping` SET `cattax_id` = '" . $cattaxID . "' WHERE `id` = '" . $mapID ."';";
+	mysql_query($sql);
+}
+//check to see if there is already a mapped value for this category if not it will insert the value into the database table if there is it returns the taxonomy id that is being used
+function categoryToTaxCheck($category){
+	$sql = "SELECT * FROM `" . $GLOBALS["schema"] . "`.`mc_cattax_mapping` WHERE `cattax_merchant_id` = '" . $GLOBALS["merchantID"] . "' AND `category_string` =  '" . $category . "';";
 	$query = mysql_query($sql);
-	$numrow = mysql_num_rows($query);
+	$numRows = mysql_num_rows($query);
+	$row = mysql_fetch_array($query);
+	
+	if($numRows == 0){
+		$insert = "INSERT INTO `" . $GLOBALS["schema"] . "`.`mc_cattax_mapping` (`category_string`,`cattax_merchant_id`) VALUES ('$category','" . $GLOBALS["merchantID"] . "');";
+		$query2 = mysql_query($insert);
 
-	if($numrow == 0){
-		echo "<li><p>All of your categories have matching taxonomy for this merchant</p></li>";
+		return 0;
 	} else {
-		while($row = mysql_fetch_array($query)){
-			echo "<li><p><strong>" . $row["missing_categories"] . "</strong> is missing taxonomy</p></li>";
+		if(is_null($row["cattax_id"])){ 
+			return 0;
+		} else {
+			return $row["cattax_id"];
 		}
 	}
+}
+//returns cattax_ID for querying
+function getCattaxID($string){
+	$sql = "SELECT `id` FROM `" . $GLOBALS["schema"] . "`.`mc_taxonomy` 
+	WHERE CONCAT((CASE WHEN COALESCE(`level1`, '') = '' THEN '' ELSE CONCAT(`level1`) END),
+		(CASE WHEN COALESCE(`level2`, '') = '' THEN '' ELSE CONCAT(' > ',`level2`) END),
+		(CASE WHEN COALESCE(`level3`, '') = '' THEN '' ELSE CONCAT(' > ',`level3`) END),
+		(CASE WHEN COALESCE(`level4`, '') = '' THEN '' ELSE CONCAT(' > ',`level4`) END),
+		(CASE WHEN COALESCE(`level5`, '') = '' THEN '' ELSE CONCAT(' > ',`level5`) END),
+		(CASE WHEN COALESCE(`level6`, '') = '' THEN '' ELSE CONCAT(' > ',`level6`) END),
+		(CASE WHEN COALESCE(`level7`, '') = '' THEN '' ELSE CONCAT(' > ',`level7`) END)) = '" . $string . "';";
+	$query = mysql_query($sql);
+	$row = mysql_fetch_array($query);
+	return $row["id"];
+}
+//locate potential taxonomy matches
+function taxonomySearch($value,$category){
+	$sql = "SELECT DISTINCT
+    CONCAT((CASE
+                WHEN `tax`.`level1` IS NULL THEN '' ELSE `tax`.`level1` END),
+            (CASE WHEN `tax`.`level2` IS NULL THEN '' ELSE CONCAT(' > ', `tax`.`level2`) END),
+            (CASE WHEN `tax`.`level3` IS NULL THEN '' ELSE CONCAT(' > ', `tax`.`level3`) END),
+            (CASE WHEN `tax`.`level4` IS NULL THEN '' ELSE CONCAT(' > ', `tax`.`level4`) END),
+            (CASE WHEN `tax`.`level5` IS NULL THEN '' ELSE CONCAT(' > ', `tax`.`level5`) END),
+            (CASE WHEN `tax`.`level6` IS NULL THEN '' ELSE CONCAT(' > ', `tax`.`level6`) END),
+            (CASE WHEN `tax`.`level7` IS NULL THEN '' ELSE CONCAT(' > ', `tax`.`level7`) END)) AS `Taxonomy`
+		FROM `" . $GLOBALS["schema"] . "`.`mc_taxonomy` AS `tax`
+		WHERE `merchant_id` = " . $GLOBALS["merchantID"] . "' AND COALESCE(`tax`.`level7`,`tax`.`level6`,`tax`.`level5`,`tax`.`level4`,`tax`.`level3`,`tax`.`level2`,`tax`.`level1`) LIKE '%" . $value . "%' LIMIT 0,100;";
+	$query = mysql_query($sql);
+
+	echo "<table><thead><td colspan=\"3\"><p>Search Results for \"<b>" . strtoupper($value) . "</b>\"</p></td></thead><tbody>";
+	while($row = mysql_fetch_array($query)){
+		echo "<tr>
+		<td><p>" . $row["Taxonomy"] . "</p></td>
+		<td></td>
+		<td>
+			<form action=\"" . $_SERVER["PHP_SELF"] . "?f=" . $_GET["f"] . "&p=" . $_GET["p"] . "\" method=\"POST\" name=\"taxonomySearch\">
+				<input type=\"hidden\" name=\"taxShortcut\" value=\"" . $row["Taxonomy"] . "\">
+				<input type=\"hidden\" name=\"category\" value=\"" . $category . "\">
+				<input type=\"submit\" name=\"apptax\" value=\"Apply this Taxonomy\"/>
+			</form>
+		</td></tr>";
+	}
+	echo "</tbody></table>";
 }
 ?>

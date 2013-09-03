@@ -12,8 +12,6 @@ if(isset($_GET["fieldID"])){
 	<img src=\"images/" . $GLOBALS['merchantID'] . "_logo.png\" alt=\"" . $GLOBALS['merchant'] . " Product Feed\" class=\"merchLogo\">
 	";
 
-	echo messageReporting();
-
 	$file = "submissions/AHS_" . $GLOBALS["merchantID"] . "_product_submission.txt"; 
 
 	if(file_exists($file)){

@@ -44,9 +44,8 @@ function updateCompile($table_name,$database_field_name,$report_field_name,$desc
 
 	return $a;
 }
-
 //error and success messages that will need to be removed from the return URL
-	$msgs = array("&msg=er0001","&msg=sc0001");
+	$msgs = array("&msg=er0001","&msg=sc0001","&msg=war0001");
 	$returnURL = str_replace($msgs,"",$_SERVER["HTTP_REFERER"]);
 
 //start update function
@@ -104,9 +103,9 @@ if($editable != "N"){
 	$query = mysql_query($sql);
 		if (!$query){die(mysql_error());}
 	
-	header("Location: " . $returnURL  . "&msg=sc0001");
+	header("Location: " . returnURL() . "&msg=sc0001");
 	} else { 
-		header("Location: " . $returnURL  . "&msg=er0001");
+		header("Location: " . returnURL() . "&msg=er0001");
 		}
 
 ?>

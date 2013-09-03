@@ -4,7 +4,7 @@ $fieldsSQL = "SELECT `id`,`report_field_name`,`order`,CASE WHEN `required` = tru
 $fieldsQUERY = mysql_query($fieldsSQL);
 
 if(isset($_GET["fieldID"])){
-	$fieldSQL = "SELECT `id`,`table_name`,`database_field_name`,`report_field_name`,`static_value`,`custom_function`,`merchant_id`,`description`,`order`,CASE WHEN `required` = true THEN 'Y' WHEN `required` = false THEN 'N' END AS `required`, CASE WHEN `enabled` = true THEN 'Y' WHEN `enabled` = false THEN 'N' END AS `enabled`, CASE	WHEN `editable` = true THEN 'Y'	WHEN `editable` = false THEN 'N' END AS `editable`, CASE WHEN `static` = true THEN 'Y' WHEN `static` = false THEN 'N' END AS `static` FROM `" . $GLOBALS["schema"] . "`.`merchant_center_select_config` WHERE `id`='" . $_GET["fieldID"] . "'";
+	$fieldSQL = "SELECT `id`,`table_name`,`database_field_name`,`report_field_name`,`static_value`,`custom_function`,`merchant_id`,`description`,`order`,CASE WHEN `required` = true THEN 'Y' WHEN `required` = false THEN 'N' END AS `required`, CASE WHEN `enabled` = true THEN 'Y' WHEN `enabled` = false THEN 'N' END AS `enabled`, CASE	WHEN `editable` = true THEN 'Y'	WHEN `editable` = false THEN 'N' END AS `editable` FROM `" . $GLOBALS["schema"] . "`.`merchant_center_select_config` WHERE `id`='" . $_GET["fieldID"] . "'";
 	$fieldQUERY = mysql_query($fieldSQL);
 }
 
@@ -28,10 +28,6 @@ function feedConfigEditable($value){
 }
 function feedConfigEditableHeader($value){
 	if($value === 'N'){return "noFieldEdit";
-	}
-}
-function feedConfigStaticDisplay($value){
-	if($value === 'N'){return "style=\"display: none;\"";
 	}
 }
 function feedConfigActive($value){
@@ -188,9 +184,8 @@ function displayFieldConfig(){
 	    <td colspan=\"5\" height=\"10\"></td>
 	  </tr>
 	  <tr>
-	    <td><p class=\"title br\">Static<a href=\"#\" title=\"This checkbox instructs the feed to insert a static value instead of querying the database. To assign a value check this box, submit your changes, and then return to this field to fill in the static value.\" class=\"tooltip\"><span title=\"help\"><img src=\"images/help.png\"></span></a></p></td>
-	    <td><input type=\"checkbox\" name=\"static\" " . feedConfigChecked($cRow["static"]) . feedConfigEditable($cRow["editable"]) . " ></td>
-	    <td colspan=\"3\"><span " . feedConfigStaticDisplay($cRow["static"]) . ">Static Value<input type=\"text\" size=\"25\" maxlength=\"250\" name=\"static_value\" value=\"" . $cRow["static_value"] . "\"" . feedConfigEditable($cRow["editable"]) . " align=\"left\"></span></td>
+	    <td><p class=\"title br\">Static Value<a href=\"#\" title=\"This checkbox instructs the feed to insert a static value instead of querying the database. To assign a value check this box, submit your changes, and then return to this field to fill in the static value.\" class=\"tooltip\"><span title=\"help\"><img src=\"images/help.png\"></span></a></p></td>
+	    <td colspan=\"4\"><span><input type=\"text\" size=\"25\" maxlength=\"250\" name=\"static_value\" value=\"" . $cRow["static_value"] . "\"" . feedConfigEditable($cRow["editable"]) . " align=\"left\"></span></td>
 	    <td></td>
 	    <td></td>
 	  </tr>
